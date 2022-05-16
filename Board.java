@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Set;
 
 public class Board {
     Board(String setting) {
@@ -13,22 +14,18 @@ public class Board {
     }
 
     void setUpRails() {
-        for (int i = 0; i < 11; i++) {
-            linearizedArray[i] = Pieces.RAIL;
-        }
-        for (int i = 110; i < 121; i++) {
-            linearizedArray[i] = Pieces.RAIL;
-        }
-        for (int i = 11; i < 110; i += 11) {
-            linearizedArray[i] = Pieces.RAIL;
-        }
-        for (int i = 21; i < 121; i += 11) {
-            linearizedArray[i] = Pieces.RAIL;
-        }
-        int[] fillerSpaces = {100, 101, 102, 103, 89, 90, 91, 78, 79, 67,
-                            53, 41, 42, 29, 30, 31, 17, 18, 19, 20 };
-        for (int pos : fillerSpaces) {
+        int[] railSpaces = { 0, 1, 2, 3, 4, 5,
+                17, 29, 41, 53, 65, 76, 87, 98, 109,
+                11, 22, 33, 44, 55, 67, 79, 91, 103,
+                115, 116, 117, 118, 119, 120 };
+        for (int pos : railSpaces) {
             linearizedArray[pos] = Pieces.RAIL;
+        }
+        int[] fillerSpaces = { 110, 111, 112, 113, 114,
+                                99, 100, 101, 102, 88, 89, 90, 77, 78, 66,
+        54, 42, 43, 30, 31, 32, 18, 19, 20, 21, 6, 7, 8, 9, 10 };
+        for (int pos : fillerSpaces) {
+            linearizedArray[pos] = Pieces.FILLER;
         }
     }
 
@@ -49,22 +46,34 @@ public class Board {
 
     void displayBoard() {
         int indent = 0;
-        for (char row = 'i'; row >= 'a'; row--) {
+        Set<Integer> rowIndices = Set.of(103, 91, 79, 67, 55, 44, 33, 22, 11);
+        Set<Integer> columnIndices = Set.of(1, 2, 3, 4, 5, 17, 29, 41, 53);
+        for (char row = 'i'; row >= 'a' - 1; row--) {
             String str = " ";
             String repeated = str.repeat(indent);
             indent += 2;
             System.out.print(repeated);
-            for (int column = 1; column <= 9; column++) {
+            for (int column = 0; column <= 9; column++) {
                 String pos = "" + row + column;
-                Pieces piece = linearizedArray[toIndex(pos)];
+                int posIndex = toIndex(pos);
+                Pieces piece = linearizedArray[posIndex];
                 if (piece == Pieces.WHITE) {
                     System.out.print(" O ");
                 } else if (piece == Pieces.BLACK) {
                     System.out.print(" @ ");
                 } else if (piece == Pieces.EMPTY) {
                     System.out.print(" + ");
-                } else if (piece == Pieces.RAIL) {
+                } else if (piece == Pieces.FILLER) {
                     System.out.print("   ");
+                } else if (piece == Pieces.RAIL) {
+                    if (rowIndices.contains(posIndex)) {
+                        String rowString = " " + row + " ";
+                        System.out.print(rowString.toUpperCase());
+                    } else if (columnIndices.contains(posIndex)) {
+                        System.out.print(" " + column + " ");
+                    } else {
+                        System.out.print("   ");
+                    }
                 }
             }
             System.out.println();
@@ -86,6 +95,8 @@ public class Board {
                 rowStringBuilder.insert(0, " + ");
             } else if (piece == Pieces.RAIL) {
                 rowStringBuilder.insert(0, " X ");
+            } else if (piece == Pieces.FILLER) {
+                rowStringBuilder.insert(0, " - ");
             }
             if (i % 11 == 0) {
                 String str = " ";
@@ -109,5 +120,16 @@ public class Board {
         return (row - lowerCase) * 11 + (column - number);
     }
 
+    public int getKilledWhite() {
+        return killedWhite;
+    }
+
+    public int getKilledBlack() {
+        return killedBlack;
+    }
+
     private Pieces[] linearizedArray;
+    private int killedWhite = 0;
+    private int killedBlack = 0;
+
 }

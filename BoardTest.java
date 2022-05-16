@@ -17,4 +17,10 @@ class BoardTest {
         Board b = new Board("default");
         b.displayBoard();
     }
+
+    @Test
+    void testToString() {
+        Board b = new Board("default");
+        System.out.println(b);
+    }
 }

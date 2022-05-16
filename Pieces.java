@@ -3,4 +3,5 @@ enum Pieces {
     BLACK,
     EMPTY,
     RAIL,
+    FILLER,
 }
