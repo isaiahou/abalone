@@ -7,25 +7,26 @@ public class Board {
     }
 
     private void defaultSet() {
-        linearizedArray = new Pieces[121];
-        Arrays.fill(linearizedArray, Pieces.EMPTY);
-        setUpRails();
+        _linearizedArray = new Pieces[121];
+        Arrays.fill(_linearizedArray, Pieces.EMPTY);
+        setupRails();
         setupPieces();
+        setupAdjecentCells();
     }
 
-    void setUpRails() {
+    void setupRails() {
         int[] railSpaces = { 0, 1, 2, 3, 4, 5,
                 17, 29, 41, 53, 65, 76, 87, 98, 109,
                 11, 22, 33, 44, 55, 67, 79, 91, 103,
                 115, 116, 117, 118, 119, 120 };
         for (int pos : railSpaces) {
-            linearizedArray[pos] = Pieces.RAIL;
+            _linearizedArray[pos] = Pieces.RAIL;
         }
         int[] fillerSpaces = { 110, 111, 112, 113, 114,
                                 99, 100, 101, 102, 88, 89, 90, 77, 78, 66,
         54, 42, 43, 30, 31, 32, 18, 19, 20, 21, 6, 7, 8, 9, 10 };
         for (int pos : fillerSpaces) {
-            linearizedArray[pos] = Pieces.FILLER;
+            _linearizedArray[pos] = Pieces.FILLER;
         }
     }
 
@@ -37,10 +38,26 @@ public class Board {
                         23, 24, 25, 26, 27, 28,
                         12, 13, 14, 15, 16 };
         for (int white : whitePieces) {
-            linearizedArray[white] = Pieces.WHITE;
+            _linearizedArray[white] = Pieces.WHITE;
         }
         for (int black : blackPieces) {
-            linearizedArray[black] = Pieces.BLACK;
+            _linearizedArray[black] = Pieces.BLACK;
+        }
+    }
+
+    void setupAdjecentCells() {
+        _adjencentCells = new int[121][6];
+        for (int i = 0; i < _linearizedArray.length; i++) {
+            for (int j = 0; j < 6; j++) {
+                switch (j) {
+                    case 0 -> _adjencentCells[i][j] = i + 11;
+                    case 1 -> _adjencentCells[i][j] = i + 12;
+                    case 2 -> _adjencentCells[i][j] = i + 1;
+                    case 3 -> _adjencentCells[i][j] = i - 11;
+                    case 4 -> _adjencentCells[i][j] = i - 12;
+                    case 5 -> _adjencentCells[i][j] = i - 1;
+                }
+            }
         }
     }
 
@@ -56,13 +73,13 @@ public class Board {
             for (int column = 0; column <= 9; column++) {
                 String pos = "" + row + column;
                 int posIndex = toIndex(pos);
-                Pieces piece = linearizedArray[posIndex];
+                Pieces piece = _linearizedArray[posIndex];
                 if (piece == Pieces.WHITE) {
                     System.out.print(" O ");
                 } else if (piece == Pieces.BLACK) {
-                    System.out.print(" @ ");
+                    System.out.print(" X ");
                 } else if (piece == Pieces.EMPTY) {
-                    System.out.print(" + ");
+                    System.out.print(" - ");
                 } else if (piece == Pieces.FILLER) {
                     System.out.print("   ");
                 } else if (piece == Pieces.RAIL) {
@@ -85,8 +102,8 @@ public class Board {
         int spacer = 0;
         StringBuilder result = new StringBuilder();
         StringBuilder rowStringBuilder = new StringBuilder();
-        for (int i = linearizedArray.length - 1 ; i >= 0; i--) {
-            Pieces piece = linearizedArray[i];
+        for (int i = _linearizedArray.length - 1; i >= 0; i--) {
+            Pieces piece = _linearizedArray[i];
             if (piece == Pieces.WHITE) {
                 rowStringBuilder.insert(0, " O ");
             } else if (piece == Pieces.BLACK) {
@@ -120,16 +137,32 @@ public class Board {
         return (row - lowerCase) * 11 + (column - number);
     }
 
+    void updateBoard(int linearizedPosition, Pieces piece) {
+        _linearizedArray[linearizedPosition] = piece;
+    }
+
+    public Pieces getPiece(String pos) {
+        return _linearizedArray[toIndex(pos)];
+    }
+
+    public Pieces getPiece(int linearizedPos) {
+        return _linearizedArray[linearizedPos];
+    }
+
     public int getKilledWhite() {
-        return killedWhite;
+        return _killedWhite;
     }
 
     public int getKilledBlack() {
-        return killedBlack;
+        return _killedBlack;
     }
 
-    private Pieces[] linearizedArray;
-    private int killedWhite = 0;
-    private int killedBlack = 0;
+    public int[][] getAdjencentCells() {
+        return _adjencentCells;
+    }
 
+    private Pieces[] _linearizedArray;
+    private int _killedWhite = 0;
+    private int _killedBlack = 0;
+    private int[][] _adjencentCells;
 }
