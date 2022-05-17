@@ -38,11 +38,13 @@ public class Move {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
             for (int j = 0; j < 3; j++) {
-                _marbleString.add(pointerMarblePosition);
-                if (_linearizedSecond == pointerMarblePosition) {
-                    return;
-                } else {
-                    pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
+                if (_board.getPiece(pointerMarblePosition) == _currentColor) {
+                    _marbleString.add(pointerMarblePosition);
+                    if (_linearizedSecond == pointerMarblePosition) {
+                        return;
+                    } else {
+                        pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
+                    }
                 }
             }
             _marbleString.clear();
@@ -87,6 +89,7 @@ public class Move {
             int newPos = _board.getAdjencentCells()[pos][direction];
             if (_board.getPiece(newPos) != Pieces.EMPTY) {
                 if (_board.getPiece(newPos) == _opponentColor) {
+                    _pushOpponent = true;
                     int opponentPointer = newPos;
                     _opponentMarbleString.add(newPos);
                     for (int i = 1; i < 3; i++) {
@@ -135,6 +138,12 @@ public class Move {
         return _direction;
     }
 
+    public boolean getPushOpponent() { return _pushOpponent; }
+
+    public Pieces getCurrentColor() { return _currentColor; }
+
+    public LinkedList<Integer> getOpponentMarbleString() { return _opponentMarbleString; }
+
     public String getCommandFormat() {
         return _commandFormat;
     }
@@ -154,4 +163,5 @@ public class Move {
     private Pieces _opponentColor;
     private LinkedList<Integer> _opponentMarbleString;
     private boolean _validMove = false;
+    private boolean _pushOpponent = false;
 }

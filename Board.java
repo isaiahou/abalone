@@ -149,6 +149,14 @@ public class Board {
         return _linearizedArray[linearizedPos];
     }
 
+    public void incrementKilled(Pieces piece) {
+        if (piece == Pieces.WHITE) {
+            _killedWhite++;
+        } else {
+            _killedBlack++;
+        }
+    }
+
     public int getKilledWhite() {
         return _killedWhite;
     }
