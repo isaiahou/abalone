@@ -22,7 +22,9 @@ public class Move {
             _destinationMarble = positionSpecification.substring(3, 5);
             _linearizedDestination = _board.toIndex(_destinationMarble);
         }
-        if (validateLineSize() && validateDestination() && validateObstacles()) {
+        if (validateLineSize()
+                && validateDestination()
+                && validateObstacles()) {
             _validMove = true;
         }
     }
@@ -90,12 +92,12 @@ public class Move {
             if (_board.getPiece(newPos) != Pieces.EMPTY) {
                 if (_board.getPiece(newPos) == _opponentColor) {
                     _pushOpponent = true;
-                    int opponentPointer = newPos;
                     _opponentMarbleString.add(newPos);
+                    int opponentPointer =_board.getAdjencentCells()[newPos][direction];
                     for (int i = 1; i < 3; i++) {
                         Pieces opponentPointerPiece = _board.getPiece(opponentPointer);
                         if (opponentPointerPiece == _opponentColor) {
-                            _opponentMarbleString.add(newPos);
+                            _opponentMarbleString.add(opponentPointer);
                             opponentPointer = _board.getAdjencentCells()[opponentPointer][direction];
                         } else if (opponentPointerPiece == _currentColor) {
                             System.out.println("Invalid move: one of your own marbles is in the way.");

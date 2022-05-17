@@ -11,30 +11,21 @@ public class Main {
         //System.out.println("The winner is " + _winner + "!");
         }
 
+        static String[] testMove1 = { "c5-a5,d5", "g5,f5","d5-b5,e5","i5-h4,g3","e5-c5,f5",
+                "h4-g3,f2", "f5-d5,g5", "g3-f2,e1", "e5-g5,h5", "i7-g7,f7", "e5-g5,h5"};
+
         static void testMove(Game newGame) {
-            Move Move = new Move("c5-a5,d5", newGame.getBoard());
-            if (Move.isValidMove() && Move.getCurrentColor() == newGame.getCurrentTurn()) {
-                newGame.executeMove(Move);
-                newGame.showBoard();
-                System.out.println();
-            }
-            Move Move1 = new Move("g5,f5", newGame.getBoard());
-            if (Move1.isValidMove() && Move1.getCurrentColor() == newGame.getCurrentTurn()) {
-                newGame.executeMove(Move1);
-                newGame.showBoard();
-                System.out.println();
-            }
-            Move Move2 = new Move("d5-b5,e5", newGame.getBoard());
-            if (Move2.isValidMove() && Move2.getCurrentColor() == newGame.getCurrentTurn()) {
-                newGame.executeMove(Move2);
-                newGame.showBoard();
-                System.out.println();
-            }
-            Move Move3 = new Move("i5-h4,g3", newGame.getBoard());
-            if (Move3.isValidMove() && Move3.getCurrentColor() == newGame.getCurrentTurn()) {
-                newGame.executeMove(Move3);
-                newGame.showBoard();
-                System.out.println();
+            for (int i = 0; i < testMove1.length; i++) {
+                Move Move = new Move(testMove1[i], newGame.getBoard());
+                if (Move.isValidMove()) {
+                    if (Move.getCurrentColor() == newGame.getCurrentTurn()) {
+                        newGame.executeMove(Move);
+                        newGame.showBoard();
+                        System.out.println("move " + i + " " + Move.getCurrentColor());
+                    } else {
+                        System.out.println("Invalid move: you cannot move your opponent's marbles.");
+                    }
+                }
             }
         }
 
