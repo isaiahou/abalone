@@ -19,12 +19,14 @@ public class Move {
             _linearizedDestination = _board.toIndex(_destinationMarble);
         } else {
             _marbleString.add(_board.toIndex(_firstMarble));
+            _marbleInLine = true;
             _destinationMarble = positionSpecification.substring(3, 5);
             _linearizedDestination = _board.toIndex(_destinationMarble);
         }
         if (validateLineSize()
                 && validateDestination()
-                && validateObstacles()) {
+                && validateObstacles()
+                && _marbleInLine) {
             _validMove = true;
         }
     }
@@ -43,6 +45,7 @@ public class Move {
                 if (_board.getPiece(pointerMarblePosition) == _currentColor) {
                     _marbleString.add(pointerMarblePosition);
                     if (_linearizedSecond == pointerMarblePosition) {
+                        _marbleInLine = true;
                         return;
                     } else {
                         pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
@@ -51,7 +54,7 @@ public class Move {
             }
             _marbleString.clear();
         }
-        System.out.println("Invalid move: marble not in a line.");
+        System.out.println("Invalid move: marble not in a straight, connected line.");
     }
 
     boolean validateLineSize() {
@@ -166,4 +169,5 @@ public class Move {
     private LinkedList<Integer> _opponentMarbleString;
     private boolean _validMove = false;
     private boolean _pushOpponent = false;
+    private boolean _marbleInLine = false;
 }

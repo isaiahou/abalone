@@ -75,9 +75,9 @@ public class Board {
                 int posIndex = toIndex(pos);
                 Pieces piece = _linearizedArray[posIndex];
                 if (piece == Pieces.WHITE) {
-                    System.out.print(" O ");
+                    System.out.print(" W ");
                 } else if (piece == Pieces.BLACK) {
-                    System.out.print(" X ");
+                    System.out.print(" B ");
                 } else if (piece == Pieces.EMPTY) {
                     System.out.print(" - ");
                 } else if (piece == Pieces.FILLER) {
@@ -105,9 +105,9 @@ public class Board {
         for (int i = _linearizedArray.length - 1; i >= 0; i--) {
             Pieces piece = _linearizedArray[i];
             if (piece == Pieces.WHITE) {
-                rowStringBuilder.insert(0, " O ");
+                rowStringBuilder.insert(0, " W ");
             } else if (piece == Pieces.BLACK) {
-                rowStringBuilder.insert(0, " @ ");
+                rowStringBuilder.insert(0, " B ");
             } else if (piece == Pieces.EMPTY) {
                 rowStringBuilder.insert(0, " + ");
             } else if (piece == Pieces.RAIL) {

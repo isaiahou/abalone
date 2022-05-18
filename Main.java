@@ -11,8 +11,18 @@ public class Main {
         //System.out.println("The winner is " + _winner + "!");
         }
 
-        static String[] testMove1 = { "c5-a5,d5", "g5,f5","d5-b5,e5","i5-h4,g3","e5-c5,f5",
-                "h4-g3,f2", "f5-d5,g5", "g3-f2,e1", "e5-g5,h5", "i7-g7,f7", "e5-g5,h5"};
+        static String[] testMove1 = { "c5-a5,d5",
+                "g5,f5",
+                "d5-b5,e5",
+                "i5-h4,g3",
+                "e5-c5,f5",
+                "h4-g3,f2",
+                "f5-d5,g5",
+                "g3-f2,e1",
+                "e5-g5,h5",
+                "i7-g7,f7",
+                "h5-f5,i5",
+                "h7-f5,e4" }; //move 11
 
         static void testMove(Game newGame) {
             for (int i = 0; i < testMove1.length; i++) {
