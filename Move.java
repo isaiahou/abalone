@@ -1,13 +1,25 @@
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Move {
 // later use regex for input validation
 
-    Move(String positionSpecification, Board board) {
+    Move(String positionSpecification, Pieces whoseTurn, Board board) {
+        Pattern singleMove = Pattern.compile("[a-i][0-9],[a-i][0-9]");
+        Pattern multiMove = Pattern.compile("[a-i][0-9]-[a-i][0-9],[a-i][0-9]");
+        Matcher singleMoveMatch = singleMove.matcher(positionSpecification);
+        Matcher multiMoveMatch = multiMove.matcher(positionSpecification);
+        if (!singleMoveMatch.matches() && !multiMoveMatch.matches()) {
+            System.out.println("Invalid move: please follow the correct syntax for moves.");
+            _validMove = false;
+            return;
+        }
         _board = board;
         _marbleString = new LinkedList<>();
         _opponentMarbleString = new LinkedList<>();
         _firstMarble = positionSpecification.substring(0, 2);
+        _currentTurn = whoseTurn;
         _currentColor = _board.getPiece(_firstMarble);
         _opponentColor = oppositeColor(_currentColor);
         _linearizedFirst = _board.toIndex(_firstMarble);
@@ -23,7 +35,8 @@ public class Move {
             _destinationMarble = positionSpecification.substring(3, 5);
             _linearizedDestination = _board.toIndex(_destinationMarble);
         }
-        if (validateLineSize()
+        if (validateTurn()
+                && validateLine()
                 && validateDestination()
                 && validateObstacles()
                 && _marbleInLine) {
@@ -41,7 +54,7 @@ public class Move {
     void createMarbleString(String firstMarble, String secondMarble) {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 26; j++) {
                 if (_board.getPiece(pointerMarblePosition) == _currentColor) {
                     _marbleString.add(pointerMarblePosition);
                     if (_linearizedSecond == pointerMarblePosition) {
@@ -54,10 +67,26 @@ public class Move {
             }
             _marbleString.clear();
         }
-        System.out.println("Invalid move: marble not in a straight, connected line.");
     }
 
-    boolean validateLineSize() {
+    boolean validateTurn() {
+        if (_currentColor == _currentTurn) {
+            return true;
+        }
+        else if (_currentColor == switchPiece(_currentTurn)) {
+            System.out.println("Invalid move: you cannot move your opponent's marbles.");
+            return false;
+        } else {
+            System.out.println("Invalid move: please select one of your marbles.");
+            return false;
+        }
+    }
+
+    boolean validateLine() {
+        if (!_marbleInLine) {
+            System.out.println("Invalid move: marble not in a straight, connected line.");
+            return false;
+        }
         if (_marbleString.size() > 3) {
             System.out.println("Invalid move: marble line is too long (max 3).");
             return false;
@@ -109,7 +138,7 @@ public class Move {
                             break;
                         }
                     }
-                    if (_opponentMarbleString.size() >= 3 || _opponentMarbleString.size() > _marbleString.size()) {
+                    if (_opponentMarbleString.size() >= 3 || _opponentMarbleString.size() >= _marbleString.size()) {
                         System.out.println("Invalid move: cannot push opponent without sumito advantage.");
                         return false;
                     }
@@ -117,10 +146,20 @@ public class Move {
                         && !(_marbleString.contains(newPos))) {
                     System.out.println("Invalid move: one of your own marbles is in the way.");
                     return false;
+                } else if (_board.getPiece(newPos) == Pieces.RAIL) {
+                    _board.incrementKilled(_currentColor);
                 }
             }
         }
         return true;
+    }
+
+    public Pieces switchPiece(Pieces color) {
+        if (color == Pieces.WHITE) {
+            return Pieces.BLACK;
+        } else {
+            return Pieces.WHITE;
+        }
     }
 
     public int getLinearizedFirst() {
@@ -153,7 +192,6 @@ public class Move {
         return _commandFormat;
     }
 
-
     private String _firstMarble;
     private int _linearizedFirst;
     private String _secondMarble;
@@ -165,6 +203,7 @@ public class Move {
     private int _direction;
     private String _commandFormat;
     private Pieces _currentColor;
+    private Pieces _currentTurn;
     private Pieces _opponentColor;
     private LinkedList<Integer> _opponentMarbleString;
     private boolean _validMove = false;
