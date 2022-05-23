@@ -4,6 +4,13 @@ public class Game {
 
     Game(String setting) {
         _board = new Board(setting);
+        _previousBoard = new Board(setting);
+    }
+
+    Game(String setting, Game newGame) {
+        _board = new Board(setting, newGame.getBoard());
+        _currentTurn = newGame.getCurrentTurn();
+        _previousBoard = newGame.getPreviousBoard();
     }
 
     boolean hasWinner() {
@@ -12,6 +19,7 @@ public class Game {
     }
 
     void executeMove(Move move) {
+        _previousBoard.setBoard(_board);
         TreeSet<Integer> opponentNewPositions = new TreeSet<>();
         TreeSet<Integer> newPositions = new TreeSet<>();
         int direction = move.getDirection();
@@ -33,7 +41,11 @@ public class Game {
         }
         for (int pos: move.getMarbleString()) {
             int newPos = _board.getAdjencentCells()[pos][direction];
-            _board.updateBoard(newPos, _board.getPiece(pos));
+            if (_board.getPiece(newPos) == Pieces.RAIL) {
+                _board.incrementKilled(_board.getPiece(pos));
+            } else {
+                _board.updateBoard(newPos, _board.getPiece(pos));
+            }
             newPositions.add(newPos);
         }
         for (int pos: move.getMarbleString()) {
@@ -41,6 +53,11 @@ public class Game {
                 _board.updateBoard(pos, Pieces.EMPTY);
             }
         }
+        switchCurrentTurn();
+    }
+
+    void undoMove() {
+        _board.setBoard(_previousBoard);
         switchCurrentTurn();
     }
 
@@ -54,12 +71,22 @@ public class Game {
 
     Board getBoard() { return _board; }
 
+    Board getPreviousBoard() {
+        return _previousBoard;
+    }
+
     Pieces getCurrentTurn() { return _currentTurn; }
     
     void showBoard() {
         _board.displayBoard();
     }
 
+    void resetBoard() {
+        _board = new Board("default");
+        _currentTurn = Pieces.BLACK;
+    }
+
     private Board _board;
     private Pieces _currentTurn = Pieces.BLACK;
+    private Board _previousBoard;
 }

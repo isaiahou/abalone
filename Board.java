@@ -1,9 +1,15 @@
 import java.util.Arrays;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Board {
     Board(String setting) {
         defaultSet();
+    }
+
+    Board(String setting, Board board0) {
+        copySet(board0);
     }
 
     private void defaultSet() {
@@ -12,6 +18,13 @@ public class Board {
         setupRails();
         setupPieces();
         setupAdjecentCells();
+    }
+
+    private void copySet(Board board0){
+        _linearizedArray = board0.getLinearizedArray().clone();
+        _adjencentCells = board0.getAdjencentCells();
+        _killedBlack = board0.getKilledBlack();
+        _killedWhite = board0.getKilledWhite();
     }
 
     void setupRails() {
@@ -72,7 +85,7 @@ public class Board {
             System.out.print(repeated);
             for (int column = 0; column <= 9; column++) {
                 String pos = "" + row + column;
-                int posIndex = toIndex(pos);
+                int posIndex = toIndexBottomRow(pos);
                 Pieces piece = _linearizedArray[posIndex];
                 if (piece == Pieces.WHITE) {
                     System.out.print(" W ");
@@ -129,6 +142,17 @@ public class Board {
     }
 
     int toIndex(String position) {
+        Pattern positionString = Pattern.compile("[a-i][1-9]");
+        Matcher positionMatcher = positionString.matcher(position);
+        if (positionMatcher.matches()) {
+            return toIndexBottomRow(position);
+        } else {
+            System.out.println("Invalid index.");
+            return 0;
+        }
+    }
+
+    int toIndexBottomRow(String position) {
         position = position.toLowerCase();
         int row = position.charAt(0);
         int column = position.charAt(1);
@@ -137,8 +161,18 @@ public class Board {
         return (row - lowerCase) * 11 + (column - number);
     }
 
+    String indexToString(int positionIndex) {
+        char row = ((char) (96 + positionIndex / 11));
+        int col = positionIndex % 11;
+        return "" + row + col;
+    }
+
     void updateBoard(int linearizedPosition, Pieces piece) {
         _linearizedArray[linearizedPosition] = piece;
+    }
+
+    void setBoard(Board board) {
+        _linearizedArray = board.getLinearizedArray().clone();
     }
 
     public Pieces getPiece(String pos) {
@@ -156,6 +190,8 @@ public class Board {
             _killedBlack++;
         }
     }
+
+    public Pieces[] getLinearizedArray() { return _linearizedArray; }
 
     public int getKilledWhite() {
         return _killedWhite;

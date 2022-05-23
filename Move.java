@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 public class Move {
 // later use regex for input validation
 
-    Move(String positionSpecification, Pieces whoseTurn, Board board) {
-        Pattern singleMove = Pattern.compile("[a-i][0-9],[a-i][0-9]");
-        Pattern multiMove = Pattern.compile("[a-i][0-9]-[a-i][0-9],[a-i][0-9]");
+    Move(String positionSpecification, Pieces whoseTurn, Board board, boolean AI) {
+        Pattern singleMove = Pattern.compile("[a-i][1-9],[a-i][1-9]");
+        Pattern multiMove = Pattern.compile("[a-i][1-9]-[a-i][1-9],[a-i][1-9]");
         Matcher singleMoveMatch = singleMove.matcher(positionSpecification);
         Matcher multiMoveMatch = multiMove.matcher(positionSpecification);
         if (!singleMoveMatch.matches() && !multiMoveMatch.matches()) {
@@ -35,6 +35,25 @@ public class Move {
             _destinationMarble = positionSpecification.substring(3, 5);
             _linearizedDestination = _board.toIndex(_destinationMarble);
         }
+        if (AI) {
+            setValidMoveAI();
+        } else {
+            setValidMove();
+        }
+    }
+
+    void setValidMoveAI() {
+        if (validateTurnAI()
+                && validateLineAI()
+                && validateDestinationAI()
+                && validateObstaclesAI()
+                && _marbleInLine
+                && !_unreasonableMove) {
+            _validMove = true;
+        }
+    }
+
+    void setValidMove() {
         if (validateTurn()
                 && validateLine()
                 && validateDestination()
@@ -55,13 +74,15 @@ public class Move {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
             for (int j = 0; j < 26; j++) {
-                if (_board.getPiece(pointerMarblePosition) == _currentColor) {
-                    _marbleString.add(pointerMarblePosition);
-                    if (_linearizedSecond == pointerMarblePosition) {
-                        _marbleInLine = true;
-                        return;
-                    } else {
-                        pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
+                if (pointerMarblePosition >= 0 && pointerMarblePosition <= 121) {
+                    if (_board.getPiece(pointerMarblePosition) == _currentColor) {
+                        _marbleString.add(pointerMarblePosition);
+                        if (_linearizedSecond == pointerMarblePosition) {
+                            _marbleInLine = true;
+                            return;
+                        } else {
+                            pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
+                        }
                     }
                 }
             }
@@ -147,7 +168,7 @@ public class Move {
                     System.out.println("Invalid move: one of your own marbles is in the way.");
                     return false;
                 } else if (_board.getPiece(newPos) == Pieces.RAIL) {
-                    _board.incrementKilled(_currentColor);
+                    _unreasonableMove = true;
                 }
             }
         }
@@ -192,6 +213,82 @@ public class Move {
         return _commandFormat;
     }
 
+    boolean validateTurnAI() {
+        if (_currentColor == _currentTurn) {
+            return true;
+        }
+        else if (_currentColor == switchPiece(_currentTurn)) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    boolean validateLineAI() {
+        if (!_marbleInLine) {
+            return false;
+        }
+        if (_marbleString.size() > 3) {
+            return false;
+        }
+        return true;
+    }
+
+    boolean validateDestinationAI() {
+        if (_linearizedFirst == _linearizedDestination || _linearizedSecond == _linearizedDestination) {
+            return false;
+        }
+        for (int i = 0; i < 6; i++) {
+            if (_board.getAdjencentCells()[_linearizedSecond][i] == _linearizedDestination) {
+                _commandFormat = "second";
+                _direction = i;
+                return true;
+            }
+        }
+        for (int i = 0; i < 6; i++) {
+            if (_board.getAdjencentCells()[_linearizedFirst][i] == _linearizedDestination) {
+                _commandFormat = "first";
+                _direction = i;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean validateObstaclesAI() {
+        for (int pos: _marbleString) {
+            int direction = _direction;
+            int newPos = _board.getAdjencentCells()[pos][direction];
+            if (_board.getPiece(newPos) != Pieces.EMPTY) {
+                if (_board.getPiece(newPos) == _opponentColor) {
+                    _pushOpponent = true;
+                    _opponentMarbleString.add(newPos);
+                    int opponentPointer =_board.getAdjencentCells()[newPos][direction];
+                    for (int i = 1; i < 3; i++) {
+                        Pieces opponentPointerPiece = _board.getPiece(opponentPointer);
+                        if (opponentPointerPiece == _opponentColor) {
+                            _opponentMarbleString.add(opponentPointer);
+                            opponentPointer = _board.getAdjencentCells()[opponentPointer][direction];
+                        } else if (opponentPointerPiece == _currentColor) {
+                            return false;
+                        } else {
+                            break;
+                        }
+                    }
+                    if (_opponentMarbleString.size() >= 3 || _opponentMarbleString.size() >= _marbleString.size()) {
+                        return false;
+                    }
+                } else if (_board.getPiece(newPos) == _currentColor
+                        && !(_marbleString.contains(newPos))) {
+                    return false;
+                } else if (_board.getPiece(newPos) == Pieces.RAIL) {
+                    _unreasonableMove = true;
+                }
+            }
+        }
+        return true;
+    }
+
     private String _firstMarble;
     private int _linearizedFirst;
     private String _secondMarble;
@@ -209,4 +306,5 @@ public class Move {
     private boolean _validMove = false;
     private boolean _pushOpponent = false;
     private boolean _marbleInLine = false;
+    private boolean _unreasonableMove = false;
 }

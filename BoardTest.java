@@ -23,4 +23,12 @@ class BoardTest {
         Board b = new Board("default");
         System.out.println(b);
     }
+
+    @Test
+    void indexToString() {
+        Board b = new Board("default");
+        for (int i = 0; i < 121; i++) {
+            System.out.println(b.indexToString(i));
+        }
+    }
 }
