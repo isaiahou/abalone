@@ -3,26 +3,32 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** Class that contains all the information regarding the game's board.
+ *  @author Isaiah Ou
+ */
+
 public class Board {
     Board(String setting) {
-        defaultSet();
+        defaultSet(setting);
     }
 
-    Board(String setting, Board board0) {
+    Board(Board board0) {
         copySet(board0);
     }
 
-    private void defaultSet() {
-        _linearizedArray = new Pieces[121];
-        Arrays.fill(_linearizedArray, Pieces.EMPTY);
-        setupRails();
-        setupPieces();
-        setupAdjecentCells();
+    private void defaultSet(String setting) {
+        if (setting.equals("default")) {
+            _linearizedArray = new Pieces[121];
+            Arrays.fill(_linearizedArray, Pieces.EMPTY);
+            setupRails();
+            setupPieces();
+            setupAdjecentCells();
+        }
     }
 
     private void copySet(Board board0){
         _linearizedArray = board0.getLinearizedArray().clone();
-        _adjencentCells = board0.getAdjencentCells();
+        _adjacentCells = board0.getAdjacentCells();
         _killedBlack = board0.getKilledBlack();
         _killedWhite = board0.getKilledWhite();
     }
@@ -59,16 +65,16 @@ public class Board {
     }
 
     void setupAdjecentCells() {
-        _adjencentCells = new int[121][6];
+        _adjacentCells = new int[121][6];
         for (int i = 0; i < _linearizedArray.length; i++) {
             for (int j = 0; j < 6; j++) {
                 switch (j) {
-                    case 0 -> _adjencentCells[i][j] = i + 11;
-                    case 1 -> _adjencentCells[i][j] = i + 12;
-                    case 2 -> _adjencentCells[i][j] = i + 1;
-                    case 3 -> _adjencentCells[i][j] = i - 11;
-                    case 4 -> _adjencentCells[i][j] = i - 12;
-                    case 5 -> _adjencentCells[i][j] = i - 1;
+                    case 0 -> _adjacentCells[i][j] = i + 11;
+                    case 1 -> _adjacentCells[i][j] = i + 12;
+                    case 2 -> _adjacentCells[i][j] = i + 1;
+                    case 3 -> _adjacentCells[i][j] = i - 11;
+                    case 4 -> _adjacentCells[i][j] = i - 12;
+                    case 5 -> _adjacentCells[i][j] = i - 1;
                 }
             }
         }
@@ -172,7 +178,9 @@ public class Board {
     }
 
     void setBoard(Board board) {
-        _linearizedArray = board.getLinearizedArray().clone();
+        _linearizedArray = Arrays.stream(board.getLinearizedArray()).toArray(Pieces[]::new);
+        _killedBlack = board.getKilledBlack();
+        _killedWhite = board.getKilledWhite();
     }
 
     public Pieces getPiece(String pos) {
@@ -193,20 +201,21 @@ public class Board {
 
     public Pieces[] getLinearizedArray() { return _linearizedArray; }
 
-    public int getKilledWhite() {
-        return _killedWhite;
-    }
+    public int getKilledWhite() { return _killedWhite; }
 
-    public int getKilledBlack() {
-        return _killedBlack;
-    }
+    public int getKilledBlack() { return _killedBlack; }
 
-    public int[][] getAdjencentCells() {
-        return _adjencentCells;
-    }
+    public int[][] getAdjacentCells() { return _adjacentCells; }
 
+    /** Linearized array of pieces representing the board. */
     private Pieces[] _linearizedArray;
+
+    /** Integer tracking the number of killed white pieces. */
     private int _killedWhite = 0;
+
+    /** Integer tracking the number of killed black pieces. */
     private int _killedBlack = 0;
-    private int[][] _adjencentCells;
+
+    /** 2D Array containing adjacency information for each piece. */
+    private int[][] _adjacentCells;
 }

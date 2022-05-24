@@ -2,9 +2,11 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Move {
-// later use regex for input validation
+/** Class that represents an instance of a move in the game.
+ *  @author Isaiah Ou
+ */
 
+public class Move {
     Move(String positionSpecification, Pieces whoseTurn, Board board, boolean AI) {
         Pattern singleMove = Pattern.compile("[a-i][1-9],[a-i][1-9]");
         Pattern multiMove = Pattern.compile("[a-i][1-9]-[a-i][1-9],[a-i][1-9]");
@@ -26,7 +28,7 @@ public class Move {
         if (positionSpecification.charAt(2) == '-') {
             _secondMarble = positionSpecification.substring(3, 5);
             _linearizedSecond = _board.toIndex(_secondMarble);
-            createMarbleString(_firstMarble, _secondMarble);
+            createMarbleString();
             _destinationMarble = positionSpecification.substring(6);
             _linearizedDestination = _board.toIndex(_destinationMarble);
         } else {
@@ -63,14 +65,7 @@ public class Move {
         }
     }
 
-    Pieces oppositeColor(Pieces color) {
-        if (color == Pieces.WHITE) {
-            return Pieces.BLACK;
-        }
-        return Pieces.WHITE;
-    }
-
-    void createMarbleString(String firstMarble, String secondMarble) {
+    void createMarbleString() {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
             for (int j = 0; j < 26; j++) {
@@ -79,9 +74,10 @@ public class Move {
                         _marbleString.add(pointerMarblePosition);
                         if (_linearizedSecond == pointerMarblePosition) {
                             _marbleInLine = true;
+                            _marbleDirection = i;
                             return;
                         } else {
-                            pointerMarblePosition = _board.getAdjencentCells()[pointerMarblePosition][i];
+                            pointerMarblePosition = _board.getAdjacentCells()[pointerMarblePosition][i];
                         }
                     }
                 }
@@ -94,7 +90,7 @@ public class Move {
         if (_currentColor == _currentTurn) {
             return true;
         }
-        else if (_currentColor == switchPiece(_currentTurn)) {
+        else if (_currentColor == oppositeColor(_currentTurn)) {
             System.out.println("Invalid move: you cannot move your opponent's marbles.");
             return false;
         } else {
@@ -121,14 +117,14 @@ public class Move {
             return false;
         }
         for (int i = 0; i < 6; i++) {
-            if (_board.getAdjencentCells()[_linearizedFirst][i] == _linearizedDestination) {
+            if (_board.getAdjacentCells()[_linearizedFirst][i] == _linearizedDestination) {
                 _commandFormat = "first";
                 _direction = i;
                 return true;
             }
         }
         for (int i = 0; i < 6; i++) {
-            if (_board.getAdjencentCells()[_linearizedSecond][i] == _linearizedDestination) {
+            if (_board.getAdjacentCells()[_linearizedSecond][i] == _linearizedDestination) {
                 _commandFormat = "second";
                 _direction = i;
                 return true;
@@ -141,17 +137,22 @@ public class Move {
     boolean validateObstacles() {
         for (int pos: _marbleString) {
             int direction = _direction;
-            int newPos = _board.getAdjencentCells()[pos][direction];
+            int newPos = _board.getAdjacentCells()[pos][direction];
             if (_board.getPiece(newPos) != Pieces.EMPTY) {
                 if (_board.getPiece(newPos) == _opponentColor) {
+                    if (_direction != _marbleDirection
+                        && ((_direction + 3) % 6) != _marbleDirection) {
+                        System.out.println("Invalid move: cannot push marbles with side step.");
+                        return false;
+                    }
                     _pushOpponent = true;
                     _opponentMarbleString.add(newPos);
-                    int opponentPointer =_board.getAdjencentCells()[newPos][direction];
+                    int opponentPointer =_board.getAdjacentCells()[newPos][direction];
                     for (int i = 1; i < 3; i++) {
                         Pieces opponentPointerPiece = _board.getPiece(opponentPointer);
                         if (opponentPointerPiece == _opponentColor) {
                             _opponentMarbleString.add(opponentPointer);
-                            opponentPointer = _board.getAdjencentCells()[opponentPointer][direction];
+                            opponentPointer = _board.getAdjacentCells()[opponentPointer][direction];
                         } else if (opponentPointerPiece == _currentColor) {
                             System.out.println("Invalid move: one of your own marbles is in the way.");
                             return false;
@@ -175,49 +176,11 @@ public class Move {
         return true;
     }
 
-    public Pieces switchPiece(Pieces color) {
-        if (color == Pieces.WHITE) {
-            return Pieces.BLACK;
-        } else {
-            return Pieces.WHITE;
-        }
-    }
-
-    public int getLinearizedFirst() {
-        return _linearizedFirst;
-    }
-
-    public int getLinearizedSecond() {
-        return _linearizedSecond;
-    }
-
-    public LinkedList<Integer> getMarbleString() {
-        return _marbleString;
-    }
-
-    public boolean isValidMove() {
-        return _validMove;
-    }
-
-    public int getDirection() {
-        return _direction;
-    }
-
-    public boolean getPushOpponent() { return _pushOpponent; }
-
-    public Pieces getCurrentColor() { return _currentColor; }
-
-    public LinkedList<Integer> getOpponentMarbleString() { return _opponentMarbleString; }
-
-    public String getCommandFormat() {
-        return _commandFormat;
-    }
-
     boolean validateTurnAI() {
         if (_currentColor == _currentTurn) {
             return true;
         }
-        else if (_currentColor == switchPiece(_currentTurn)) {
+        else if (_currentColor == oppositeColor(_currentTurn)) {
             return false;
         } else {
             return false;
@@ -228,10 +191,7 @@ public class Move {
         if (!_marbleInLine) {
             return false;
         }
-        if (_marbleString.size() > 3) {
-            return false;
-        }
-        return true;
+        return _marbleString.size() <= 3;
     }
 
     boolean validateDestinationAI() {
@@ -239,14 +199,14 @@ public class Move {
             return false;
         }
         for (int i = 0; i < 6; i++) {
-            if (_board.getAdjencentCells()[_linearizedSecond][i] == _linearizedDestination) {
+            if (_board.getAdjacentCells()[_linearizedSecond][i] == _linearizedDestination) {
                 _commandFormat = "second";
                 _direction = i;
                 return true;
             }
         }
         for (int i = 0; i < 6; i++) {
-            if (_board.getAdjencentCells()[_linearizedFirst][i] == _linearizedDestination) {
+            if (_board.getAdjacentCells()[_linearizedFirst][i] == _linearizedDestination) {
                 _commandFormat = "first";
                 _direction = i;
                 return true;
@@ -258,17 +218,21 @@ public class Move {
     boolean validateObstaclesAI() {
         for (int pos: _marbleString) {
             int direction = _direction;
-            int newPos = _board.getAdjencentCells()[pos][direction];
+            int newPos = _board.getAdjacentCells()[pos][direction];
             if (_board.getPiece(newPos) != Pieces.EMPTY) {
                 if (_board.getPiece(newPos) == _opponentColor) {
+                    if (_direction != _marbleDirection
+                            && ((_direction + 3) % 6) != _marbleDirection) {
+                        return false;
+                    }
                     _pushOpponent = true;
                     _opponentMarbleString.add(newPos);
-                    int opponentPointer =_board.getAdjencentCells()[newPos][direction];
+                    int opponentPointer =_board.getAdjacentCells()[newPos][direction];
                     for (int i = 1; i < 3; i++) {
                         Pieces opponentPointerPiece = _board.getPiece(opponentPointer);
                         if (opponentPointerPiece == _opponentColor) {
                             _opponentMarbleString.add(opponentPointer);
-                            opponentPointer = _board.getAdjencentCells()[opponentPointer][direction];
+                            opponentPointer = _board.getAdjacentCells()[opponentPointer][direction];
                         } else if (opponentPointerPiece == _currentColor) {
                             return false;
                         } else {
@@ -289,22 +253,95 @@ public class Move {
         return true;
     }
 
+    public boolean isValidMove() { return _validMove; }
+
+    Pieces oppositeColor(Pieces color) {
+        if (color == Pieces.WHITE) {
+            return Pieces.BLACK;
+        }
+        return Pieces.WHITE;
+    }
+
+    public LinkedList<Integer> getMarbleString() {
+        return _marbleString;
+    }
+
+    public int getDirection() {
+        return _direction;
+    }
+
+    public boolean getPushOpponent() { return _pushOpponent; }
+
+    public LinkedList<Integer> getOpponentMarbleString() { return _opponentMarbleString; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Move m)) {
+            return false;
+        }
+        return this.getDirection() == m.getDirection()
+                && this.getMarbleString().size() == m.getMarbleString().size()
+                && this.getMarbleString().containsAll(m.getMarbleString());
+    }
+
+    /** String representing the coordinates of the first marble. */
     private String _firstMarble;
-    private int _linearizedFirst;
+
+    /** String representing the coordinates of the second marble. */
     private String _secondMarble;
-    private int _linearizedSecond;
-    private Board _board;
+
+    /** String representing the coordinates of the destination marble. */
     private String _destinationMarble;
+
+    /** Integer representing the index of the first marble. */
+    private int _linearizedFirst;
+
+    /** Integer representing the index of the second marble. */
+    private int _linearizedSecond;
+
+    /** Integer representing the index of the destination marble. */
     private int _linearizedDestination;
+
+    /** Board instance of the move executed on. */
+    private Board _board;
+
+    /** Linked list containing all indices of the marbles in the marble string. */
     private LinkedList<Integer> _marbleString;
-    private int _direction;
-    private String _commandFormat;
-    private Pieces _currentColor;
-    private Pieces _currentTurn;
-    private Pieces _opponentColor;
+
+    /** Linked list containing all indices of the marbles in the
+     * marble string of the opponent if pushed. */
     private LinkedList<Integer> _opponentMarbleString;
+
+    /** Direction of move indexed with the top left corner as 0. */
+    private int _direction;
+
+    /** Direction of marble alignment indexed with the top left corner as 0. */
+    private int _marbleDirection;
+
+    /** String indicating whether the format of the command. */
+    private String _commandFormat;
+
+    /** Indication of the move's color. */
+    private Pieces _currentColor;
+
+    /** Indication of the move's opponent color. */
+    private Pieces _opponentColor;
+
+    /** Indication of the current turn of the board instance. */
+    private Pieces _currentTurn;
+
+    /** Boolean value representing the validity of a move. */
     private boolean _validMove = false;
+
+    /** Boolean value indicating whether an opponent was pushed. */
     private boolean _pushOpponent = false;
+
+    /** Boolean value indicating whether the marbles are in line. */
     private boolean _marbleInLine = false;
+
+    /** Boolean value indicating whether the move involves suicide. */
     private boolean _unreasonableMove = false;
 }

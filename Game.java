@@ -1,16 +1,14 @@
 import java.util.TreeSet;
 
+/** Class that represents an instance of a game.
+ *  @author Isaiah Ou
+ */
+
 public class Game {
 
     Game(String setting) {
         _board = new Board(setting);
-        _previousBoard = new Board(setting);
-    }
-
-    Game(String setting, Game newGame) {
-        _board = new Board(setting, newGame.getBoard());
-        _currentTurn = newGame.getCurrentTurn();
-        _previousBoard = newGame.getPreviousBoard();
+        _currentTurn = Pieces.BLACK;
     }
 
     boolean hasWinner() {
@@ -19,13 +17,12 @@ public class Game {
     }
 
     void executeMove(Move move) {
-        _previousBoard.setBoard(_board);
         TreeSet<Integer> opponentNewPositions = new TreeSet<>();
         TreeSet<Integer> newPositions = new TreeSet<>();
         int direction = move.getDirection();
         if (move.getPushOpponent()) {
             for (int pos: move.getOpponentMarbleString()) {
-                int newPos = _board.getAdjencentCells()[pos][direction];
+                int newPos = _board.getAdjacentCells()[pos][direction];
                 if (_board.getPiece(newPos) == Pieces.RAIL) {
                     _board.incrementKilled(_board.getPiece(pos));
                 } else {
@@ -40,7 +37,7 @@ public class Game {
             }
         }
         for (int pos: move.getMarbleString()) {
-            int newPos = _board.getAdjencentCells()[pos][direction];
+            int newPos = _board.getAdjacentCells()[pos][direction];
             if (_board.getPiece(newPos) == Pieces.RAIL) {
                 _board.incrementKilled(_board.getPiece(pos));
             } else {
@@ -56,11 +53,6 @@ public class Game {
         switchCurrentTurn();
     }
 
-    void undoMove() {
-        _board.setBoard(_previousBoard);
-        switchCurrentTurn();
-    }
-
     void switchCurrentTurn() {
         if (_currentTurn == Pieces.BLACK) {
             _currentTurn = Pieces.WHITE;
@@ -69,24 +61,20 @@ public class Game {
         }
     }
 
-    Board getBoard() { return _board; }
-
-    Board getPreviousBoard() {
-        return _previousBoard;
-    }
-
-    Pieces getCurrentTurn() { return _currentTurn; }
-    
-    void showBoard() {
-        _board.displayBoard();
-    }
+    void showBoard() { _board.displayBoard(); }
 
     void resetBoard() {
         _board = new Board("default");
         _currentTurn = Pieces.BLACK;
     }
 
+    Board getBoard() { return _board; }
+
+    Pieces getCurrentTurn() { return _currentTurn; }
+
+    /** Holds the board instance of the game. */
     private Board _board;
-    private Pieces _currentTurn = Pieces.BLACK;
-    private Board _previousBoard;
+
+    /** Tracks which color's turn it is. */
+    private Pieces _currentTurn;
 }
