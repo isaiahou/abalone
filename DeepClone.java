@@ -30,4 +30,5 @@ public class DeepClone {
         ByteArrayInputStream bais = new ByteArrayInputStream(byteData);
         return (Board) new ObjectInputStream(bais).readObject();
     }
+
 }

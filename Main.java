@@ -113,4 +113,5 @@ public class Main {
 
     /** String that states the winner's color. */
     private static String _winner;
+
 }

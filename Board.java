@@ -213,4 +213,5 @@ public class Board implements Serializable {
 
     /** 2D Array containing adjacency information for each piece. */
     private int[][] _adjacentCells;
+
 }

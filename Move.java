@@ -343,4 +343,5 @@ public class Move {
 
     /** Boolean value indicating whether the move involves suicide. */
     private boolean _unreasonableMove = false;
+
 }
