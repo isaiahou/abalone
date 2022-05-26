@@ -1,5 +1,4 @@
-import java.util.List;
-import java.util.Random;
+import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -8,7 +7,7 @@ import java.util.Scanner;
  */
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         String setting = args[0];
         String aiPlaying = args[1];
         Game newGame = new Game(setting);
@@ -19,15 +18,15 @@ public class Main {
         } else if (aiPlaying.equals("true")) {
             String aiPlayers = args[2];
             if (aiPlayers.equals("2")) {
-                runGameAIDumb2(newGame);
+                runGameAI2(newGame);
             } else if (aiPlayers.equals("1")) {
-                runGameAIDumb(newGame);
+                runGameAI(newGame);
             }
         }
         System.out.println("The winner is " + _winner + "!");
     }
 
-    static void runGame(Game newGame) {
+    static void runGame(Game newGame) throws IOException, ClassNotFoundException {
         while (!newGame.hasWinner()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Black's move:");
@@ -44,7 +43,7 @@ public class Main {
         }
     }
 
-    private static void conductMove(Game newGame, Scanner scanner, String message) {
+    private static void conductMove(Game newGame, Scanner scanner, String message) throws IOException, ClassNotFoundException {
         String userInput = scanner.nextLine();
         System.out.println(userInput);
         while (!_moveExecuted) {
@@ -64,7 +63,7 @@ public class Main {
         _moveExecuted = false;
     }
 
-    static void runGameAIDumb (Game newGame) {
+    static void runGameAI (Game newGame) throws IOException, ClassNotFoundException {
         while (!newGame.hasWinner()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Black's move:");
@@ -80,7 +79,7 @@ public class Main {
         }
     }
 
-    static void runGameAIDumb2(Game newGame) {
+    static void runGameAI2 (Game newGame) throws IOException, ClassNotFoundException {
         int counter = 0;
         while (!newGame.hasWinner()) {
             conductMoveAI(newGame);
@@ -98,12 +97,11 @@ public class Main {
         }
     }
 
-    private static void conductMoveAI(Game newGame) {
-        AI ai = new AI(newGame.getBoard(), newGame.getCurrentTurn());
-        Random rand = new Random();
-        List<Move> moves = ai.getLegalMoves(newGame);
-        int randomIndex = rand.nextInt(moves.size());
-        newGame.executeMove(moves.get(randomIndex));
+
+    private static void conductMoveAI(Game newGame) throws IOException, ClassNotFoundException {
+        AI ai = new AI(newGame);
+        Move bestMove = ai.findMove();
+        newGame.executeMove(bestMove);
         newGame.showBoard();
         System.out.println("White dead: " + newGame.getBoard().getKilledWhite());
         System.out.println("Black dead: " + newGame.getBoard().getKilledBlack());

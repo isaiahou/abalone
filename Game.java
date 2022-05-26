@@ -1,13 +1,18 @@
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Stack;
 import java.util.TreeSet;
 
 /** Class that represents an instance of a game.
  *  @author Isaiah Ou
  */
 
-public class Game {
+public class Game implements Serializable {
 
     Game(String setting) {
         _board = new Board(setting);
+        _previousBoards = new Stack<>();
+        _previousBoards.add(_board);
         _currentTurn = Pieces.BLACK;
     }
 
@@ -16,7 +21,17 @@ public class Game {
                 || _board.getKilledBlack() >= 6;
     }
 
-    void executeMove(Move move) {
+    Pieces getWinner() {
+        assert hasWinner();
+        if (_board.getKilledBlack() >= 6) {
+            return Pieces.WHITE;
+        } else {
+            return Pieces.BLACK;
+        }
+    }
+
+    void executeMove(Move move) throws IOException, ClassNotFoundException {
+        _previousBoards.add(DeepClone.cloneBoard(_board));
         TreeSet<Integer> opponentNewPositions = new TreeSet<>();
         TreeSet<Integer> newPositions = new TreeSet<>();
         int direction = move.getDirection();
@@ -53,6 +68,11 @@ public class Game {
         switchCurrentTurn();
     }
 
+    void undoMove() {
+        _board = _previousBoards.pop();
+        switchCurrentTurn();
+    }
+
     void switchCurrentTurn() {
         if (_currentTurn == Pieces.BLACK) {
             _currentTurn = Pieces.WHITE;
@@ -70,11 +90,17 @@ public class Game {
 
     Board getBoard() { return _board; }
 
+    Stack<Board> getPreviousBoards() { return _previousBoards; }
+
     Pieces getCurrentTurn() { return _currentTurn; }
 
     /** Holds the board instance of the game. */
     private Board _board;
 
+    /** Holds the board instances of the previous moves in the game. */
+    private final Stack<Board> _previousBoards;
+
     /** Tracks which color's turn it is. */
     private Pieces _currentTurn;
+
 }

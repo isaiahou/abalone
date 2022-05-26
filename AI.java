@@ -1,20 +1,17 @@
+import java.io.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 /** Class that contains the method used by the AI.
  *  @author Isaiah Ou
  */
 
 public class AI {
-    AI (Board board, Pieces color) {
-        _board = new Board(board);
-        _AIColor = color;
+    AI (Game game) {
+        _game = game;
     }
 
     List<String> getMyPieces(Game copyNewGame) {
@@ -59,7 +56,7 @@ public class AI {
         return marbleStrings;
     }
 
-    List<Move> getLegalMoves(Game copyNewGame) {
+    ArrayList<Move> getLegalMoves(Game copyNewGame) {
         ArrayList<Move> legalMoves = new ArrayList<>();
         Pattern positionString = Pattern.compile("[a-i][1-9]");
         for (String marbleString : getMarbleStrings(copyNewGame)) {
@@ -83,9 +80,89 @@ public class AI {
         return legalMoves;
     }
 
-    /** Tracks the board instance of the given game. */
-    Board _board;
+    Move findMove() throws IOException, ClassNotFoundException {
+        Game copyGame = DeepClone.cloneGame(_game);
+        _bestMove = null;
+        if (_game.getCurrentTurn() == Pieces.BLACK) {
+            minMax(copyGame, MAX_DEPTH, -INFINITY, INFINITY, true, true);
+        } else if (_game.getCurrentTurn() == Pieces.WHITE){
+            minMax(copyGame, MAX_DEPTH, -INFINITY, INFINITY, false, true);
+        }
+        return _bestMove;
+    }
 
-    /** Tracks the AI's color in the given game. */
-    Pieces _AIColor;
+    private int minMax(Game game, int depth, int alpha, int beta, boolean maximizingPlayer, boolean saveMove) throws IOException, ClassNotFoundException {
+        if (depth == 0 || game.hasWinner()) {
+            return staticEvaluation(game);
+        }
+        Move best;
+        int bestScore;
+        if (maximizingPlayer) {
+            bestScore = -INFINITY;
+        } else {
+            bestScore = INFINITY;
+        }
+        ArrayList<Move> legalMoves = getLegalMoves(game);
+        Collections.shuffle(legalMoves);
+        for (Move m: legalMoves) {
+            if (maximizingPlayer) {
+                game.executeMove(m);
+                int response = minMax(game, depth - 1, alpha, beta, false, false);
+                if (response > bestScore) {
+                    best = m;
+                    bestScore = response;
+                    if (saveMove) {
+                        _bestMove = best;
+                    }
+                }
+                game.undoMove();
+            } else {
+                game.executeMove(m);
+                int response = minMax(game, depth - 1, alpha, beta, true, false);
+                if (response < bestScore) {
+                    best = m;
+                    bestScore = response;
+                    if (saveMove) {
+                        _bestMove = best;
+                    }
+                }
+                game.undoMove();
+            }
+        }
+        return staticEvaluation(game);
+    }
+
+    int staticEvaluation(Game game) {
+        if (game.hasWinner()) {
+            if (game.getWinner() == Pieces.BLACK) {
+                return WINNING_VALUE;
+            } else {
+                return -WINNING_VALUE;
+            }
+        } else {
+            int[] centerPieceIndices = { 60, 71, 72, 61, 49, 48, 59 };
+            int centerCounter = 0;
+            for (int i: centerPieceIndices) {
+                if (game.getBoard().getPiece(i) == Pieces.BLACK) {
+                    centerCounter++;
+                }
+            }
+            return (int) (game.getBoard().getKilledWhite()/6*0.75 + centerCounter/7*0.25);
+        }
+    }
+
+    /** Integer value representing the static evaluation of a win. */
+    private static final int WINNING_VALUE = Integer.MAX_VALUE - 20;
+
+    /** Integer value representing infinity for the minMax algorithm. */
+    private static final int INFINITY = Integer.MAX_VALUE;
+
+    /** Integer value of the max depth that the minMax algorithm will search. */
+    private static final int MAX_DEPTH = 2;
+
+    /** Move instance that records the best move found from the minMax algorithm. */
+    private static Move _bestMove;
+
+    /** Tracks the current game the AI is playing. */
+    Game _game;
 }

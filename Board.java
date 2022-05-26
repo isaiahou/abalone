@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -7,7 +8,7 @@ import java.util.regex.Pattern;
  *  @author Isaiah Ou
  */
 
-public class Board {
+public class Board implements Serializable {
     Board(String setting) {
         defaultSet(setting);
     }
@@ -22,7 +23,7 @@ public class Board {
             Arrays.fill(_linearizedArray, Pieces.EMPTY);
             setupRails();
             setupPieces();
-            setupAdjecentCells();
+            setupAdjacentCells();
         }
     }
 
@@ -64,7 +65,7 @@ public class Board {
         }
     }
 
-    void setupAdjecentCells() {
+    void setupAdjacentCells() {
         _adjacentCells = new int[121][6];
         for (int i = 0; i < _linearizedArray.length; i++) {
             for (int j = 0; j < 6; j++) {
