@@ -30,13 +30,12 @@ public class Move {
             _linearizedSecond = _board.toIndex(_secondMarble);
             createMarbleString();
             _destinationMarble = positionSpecification.substring(6);
-            _linearizedDestination = _board.toIndex(_destinationMarble);
         } else {
             _marbleString.add(_board.toIndex(_firstMarble));
             _marbleInLine = true;
             _destinationMarble = positionSpecification.substring(3, 5);
-            _linearizedDestination = _board.toIndex(_destinationMarble);
         }
+        _linearizedDestination = _board.toIndex(_destinationMarble);
         if (AI) {
             setValidMoveAI();
         } else {
@@ -44,7 +43,7 @@ public class Move {
         }
     }
 
-    void setValidMoveAI() {
+    private void setValidMoveAI() {
         if (validateTurnAI()
                 && validateLineAI()
                 && validateDestinationAI()
@@ -55,7 +54,7 @@ public class Move {
         }
     }
 
-    void setValidMove() {
+    private void setValidMove() {
         if (validateTurn()
                 && validateLine()
                 && validateDestination()
@@ -65,7 +64,7 @@ public class Move {
         }
     }
 
-    void createMarbleString() {
+    private void createMarbleString() {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
             for (int j = 0; j < 26; j++) {
@@ -86,7 +85,7 @@ public class Move {
         }
     }
 
-    boolean validateTurn() {
+    private boolean validateTurn() {
         if (_currentColor == _currentTurn) {
             return true;
         }
@@ -99,7 +98,7 @@ public class Move {
         }
     }
 
-    boolean validateLine() {
+    private boolean validateLine() {
         if (!_marbleInLine) {
             System.out.println("Invalid move: marble not in a straight, connected line.");
             return false;
@@ -111,7 +110,7 @@ public class Move {
         return true;
     }
 
-    boolean validateDestination() {
+    private boolean validateDestination() {
         if (_linearizedFirst == _linearizedDestination || _linearizedSecond == _linearizedDestination) {
             System.out.println("Invalid move: no marbles were moved.");
             return false;
@@ -134,7 +133,7 @@ public class Move {
         return false;
     }
 
-    boolean validateObstacles() {
+    private boolean validateObstacles() {
         for (int pos: _marbleString) {
             int direction = _direction;
             int newPos = _board.getAdjacentCells()[pos][direction];
@@ -176,7 +175,7 @@ public class Move {
         return true;
     }
 
-    boolean validateTurnAI() {
+    private boolean validateTurnAI() {
         if (_currentColor == _currentTurn) {
             return true;
         }
@@ -187,14 +186,14 @@ public class Move {
         }
     }
 
-    boolean validateLineAI() {
+    private boolean validateLineAI() {
         if (!_marbleInLine) {
             return false;
         }
         return _marbleString.size() <= 3;
     }
 
-    boolean validateDestinationAI() {
+    private boolean validateDestinationAI() {
         if (_linearizedFirst == _linearizedDestination || _linearizedSecond == _linearizedDestination) {
             return false;
         }
@@ -215,7 +214,7 @@ public class Move {
         return false;
     }
 
-    boolean validateObstaclesAI() {
+    private boolean validateObstaclesAI() {
         for (int pos: _marbleString) {
             int direction = _direction;
             int newPos = _board.getAdjacentCells()[pos][direction];
@@ -255,7 +254,7 @@ public class Move {
 
     public boolean isValidMove() { return _validMove; }
 
-    Pieces oppositeColor(Pieces color) {
+    private Pieces oppositeColor(Pieces color) {
         if (color == Pieces.WHITE) {
             return Pieces.BLACK;
         }

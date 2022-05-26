@@ -1,6 +1,7 @@
 import java.io.*;
 
 /** Class containing functions that deep clone selected objects.
+ *  Uses serialization and deserialization to make deep copies.
  *  Credits to online references for source code.
  */
 

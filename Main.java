@@ -26,7 +26,7 @@ public class Main {
         System.out.println("The winner is " + _winner + "!");
     }
 
-    static void runGame(Game newGame) throws IOException, ClassNotFoundException {
+    private static void runGame(Game newGame) throws IOException, ClassNotFoundException {
         while (!newGame.hasWinner()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Black's move:");
@@ -63,7 +63,7 @@ public class Main {
         _moveExecuted = false;
     }
 
-    static void runGameAI (Game newGame) throws IOException, ClassNotFoundException {
+    private static void runGameAI (Game newGame) throws IOException, ClassNotFoundException {
         while (!newGame.hasWinner()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Black's move:");
@@ -79,7 +79,7 @@ public class Main {
         }
     }
 
-    static void runGameAI2 (Game newGame) throws IOException, ClassNotFoundException {
+    private static void runGameAI2 (Game newGame) throws IOException, ClassNotFoundException {
         int counter = 0;
         while (!newGame.hasWinner()) {
             conductMoveAI(newGame);
@@ -109,8 +109,8 @@ public class Main {
     }
 
     /** Boolean value to record whether a move has been executed. */
-    static boolean _moveExecuted = false;
+    private static boolean _moveExecuted = false;
 
     /** String that states the winner's color. */
-    static String _winner;
+    private static String _winner;
 }

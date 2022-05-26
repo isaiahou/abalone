@@ -14,7 +14,7 @@ public class AI {
         _game = game;
     }
 
-    List<String> getMyPieces(Game copyNewGame) {
+    private List<String> getMyPieces(Game copyNewGame) {
         ArrayList<String> myPieces = new ArrayList<>();
         for (char row = 'a'; row <= 'i'; row++) {
             for (int col = 1; col <= 9; col++) {
@@ -30,7 +30,7 @@ public class AI {
         return myPieces;
     }
 
-    List<String> getMarbleStrings(Game copyNewGame) {
+    private List<String> getMarbleStrings(Game copyNewGame) {
         ArrayList<String> marbleStrings = new ArrayList<>();
         Pattern positionString = Pattern.compile("[a-i][1-9]");
         for (String myPiecePos : getMyPieces(copyNewGame)) {
@@ -56,7 +56,7 @@ public class AI {
         return marbleStrings;
     }
 
-    ArrayList<Move> getLegalMoves(Game copyNewGame) {
+    private ArrayList<Move> getLegalMoves(Game copyNewGame) {
         ArrayList<Move> legalMoves = new ArrayList<>();
         Pattern positionString = Pattern.compile("[a-i][1-9]");
         for (String marbleString : getMarbleStrings(copyNewGame)) {
@@ -80,7 +80,7 @@ public class AI {
         return legalMoves;
     }
 
-    Move findMove() throws IOException, ClassNotFoundException {
+    public Move findMove() throws IOException, ClassNotFoundException {
         Game copyGame = DeepClone.cloneGame(_game);
         _bestMove = null;
         if (_game.getCurrentTurn() == Pieces.BLACK) {

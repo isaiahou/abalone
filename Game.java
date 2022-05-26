@@ -16,12 +16,12 @@ public class Game implements Serializable {
         _currentTurn = Pieces.BLACK;
     }
 
-    boolean hasWinner() {
+    public boolean hasWinner() {
         return _board.getKilledWhite() >= 6
                 || _board.getKilledBlack() >= 6;
     }
 
-    Pieces getWinner() {
+    public Pieces getWinner() {
         assert hasWinner();
         if (_board.getKilledBlack() >= 6) {
             return Pieces.WHITE;
@@ -30,7 +30,7 @@ public class Game implements Serializable {
         }
     }
 
-    void executeMove(Move move) throws IOException, ClassNotFoundException {
+    public void executeMove(Move move) throws IOException, ClassNotFoundException {
         _previousBoards.add(DeepClone.cloneBoard(_board));
         TreeSet<Integer> opponentNewPositions = new TreeSet<>();
         TreeSet<Integer> newPositions = new TreeSet<>();
@@ -68,12 +68,12 @@ public class Game implements Serializable {
         switchCurrentTurn();
     }
 
-    void undoMove() {
+    public void undoMove() {
         _board = _previousBoards.pop();
         switchCurrentTurn();
     }
 
-    void switchCurrentTurn() {
+    private void switchCurrentTurn() {
         if (_currentTurn == Pieces.BLACK) {
             _currentTurn = Pieces.WHITE;
         } else {
@@ -81,18 +81,18 @@ public class Game implements Serializable {
         }
     }
 
-    void showBoard() { _board.displayBoard(); }
+    public void showBoard() { _board.displayBoard(); }
 
-    void resetBoard() {
+    private void resetBoard() {
         _board = new Board("default");
         _currentTurn = Pieces.BLACK;
     }
 
-    Board getBoard() { return _board; }
+    public Board getBoard() { return _board; }
 
-    Stack<Board> getPreviousBoards() { return _previousBoards; }
+    public Stack<Board> getPreviousBoards() { return _previousBoards; }
 
-    Pieces getCurrentTurn() { return _currentTurn; }
+    public Pieces getCurrentTurn() { return _currentTurn; }
 
     /** Holds the board instance of the game. */
     private Board _board;

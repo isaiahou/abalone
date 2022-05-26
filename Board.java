@@ -34,7 +34,7 @@ public class Board implements Serializable {
         _killedWhite = board0.getKilledWhite();
     }
 
-    void setupRails() {
+    private void setupRails() {
         int[] railSpaces = { 0, 1, 2, 3, 4, 5,
                 17, 29, 41, 53, 65, 76, 87, 98, 109,
                 11, 22, 33, 44, 55, 67, 79, 91, 103,
@@ -65,7 +65,7 @@ public class Board implements Serializable {
         }
     }
 
-    void setupAdjacentCells() {
+    private void setupAdjacentCells() {
         _adjacentCells = new int[121][6];
         for (int i = 0; i < _linearizedArray.length; i++) {
             for (int j = 0; j < 6; j++) {
@@ -81,7 +81,7 @@ public class Board implements Serializable {
         }
     }
 
-    void displayBoard() {
+    public void displayBoard() {
         int indent = 0;
         Set<Integer> rowIndices = Set.of(103, 91, 79, 67, 55, 44, 33, 22, 11);
         Set<Integer> columnIndices = Set.of(1, 2, 3, 4, 5, 17, 29, 41, 53);
@@ -148,7 +148,7 @@ public class Board implements Serializable {
         return result.toString();
     }
 
-    int toIndex(String position) {
+    public int toIndex(String position) {
         Pattern positionString = Pattern.compile("[a-i][1-9]");
         Matcher positionMatcher = positionString.matcher(position);
         if (positionMatcher.matches()) {
@@ -159,7 +159,7 @@ public class Board implements Serializable {
         }
     }
 
-    int toIndexBottomRow(String position) {
+    public int toIndexBottomRow(String position) {
         position = position.toLowerCase();
         int row = position.charAt(0);
         int column = position.charAt(1);
@@ -168,20 +168,14 @@ public class Board implements Serializable {
         return (row - lowerCase) * 11 + (column - number);
     }
 
-    String indexToString(int positionIndex) {
+    public String indexToString(int positionIndex) {
         char row = ((char) (96 + positionIndex / 11));
         int col = positionIndex % 11;
         return "" + row + col;
     }
 
-    void updateBoard(int linearizedPosition, Pieces piece) {
+    public void updateBoard(int linearizedPosition, Pieces piece) {
         _linearizedArray[linearizedPosition] = piece;
-    }
-
-    void setBoard(Board board) {
-        _linearizedArray = Arrays.stream(board.getLinearizedArray()).toArray(Pieces[]::new);
-        _killedBlack = board.getKilledBlack();
-        _killedWhite = board.getKilledWhite();
     }
 
     public Pieces getPiece(String pos) {
