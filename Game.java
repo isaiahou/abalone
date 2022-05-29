@@ -14,6 +14,7 @@ public class Game implements Serializable {
         _previousBoards = new Stack<>();
         _previousBoards.add(_board);
         _currentTurn = Pieces.BLACK;
+        _gui = new GUI();
     }
 
     public boolean hasWinner() {
@@ -96,6 +97,9 @@ public class Game implements Serializable {
 
     /** Holds the board instance of the game. */
     private Board _board;
+
+    /** Holds the gui instance of the game. */
+    private GUI _gui;
 
     /** Holds the board instances of the previous moves in the game. */
     private final Stack<Board> _previousBoards;
