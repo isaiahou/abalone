@@ -11,6 +11,7 @@ public class Main {
         String setting = args[0];
         String aiPlaying = args[1];
         Game newGame = new Game(setting);
+        GUI gui = new GUI(newGame);
         newGame.showBoard();
         System.out.println();
         if (aiPlaying.equals("false")) {
