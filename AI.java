@@ -85,7 +85,7 @@ public class AI {
         _bestMove = null;
         if (_game.getCurrentTurn() == Pieces.BLACK) {
             minMax(copyGame, MAX_DEPTH, -INFINITY, INFINITY, true, true);
-        } else if (_game.getCurrentTurn() == Pieces.WHITE){
+        } else if (_game.getCurrentTurn() == Pieces.WHITE) {
             minMax(copyGame, MAX_DEPTH, -INFINITY, INFINITY, false, true);
         }
         return _bestMove;
@@ -95,41 +95,48 @@ public class AI {
         if (depth == 0 || game.hasWinner()) {
             return staticEvaluation(game);
         }
-        Move best;
-        int bestScore;
-        if (maximizingPlayer) {
-            bestScore = -INFINITY;
-        } else {
-            bestScore = INFINITY;
-        }
+        Move best = null;
         ArrayList<Move> legalMoves = getLegalMoves(game);
         Collections.shuffle(legalMoves);
-        for (Move m: legalMoves) {
-            if (maximizingPlayer) {
+        if (maximizingPlayer) {
+            int maxEval = -INFINITY;
+            for (Move m: legalMoves) {
                 game.executeMove(m);
-                int response = minMax(game, depth - 1, alpha, beta, false, false);
-                if (response > bestScore) {
+                int eval = minMax(game, depth - 1, alpha, beta, false, false);
+                if (eval > maxEval) {
+                    maxEval = eval;
                     best = m;
-                    bestScore = response;
-                    if (saveMove) {
-                        _bestMove = best;
-                    }
                 }
-                game.undoMove();
-            } else {
-                game.executeMove(m);
-                int response = minMax(game, depth - 1, alpha, beta, true, false);
-                if (response < bestScore) {
-                    best = m;
-                    bestScore = response;
-                    if (saveMove) {
-                        _bestMove = best;
-                    }
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    break;
                 }
                 game.undoMove();
             }
+            if (saveMove) {
+                _bestMove = best;
+            }
+            return maxEval;
+        } else {
+            int minEval = INFINITY;
+            for (Move m: legalMoves) {
+                game.executeMove(m);
+                int eval = minMax(game, depth - 1, alpha, beta, true, false);
+                if (eval < minEval) {
+                    minEval = eval;
+                    best = m;
+                }
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) {
+                    break;
+                }
+                game.undoMove();
+            }
+            if (saveMove) {
+                _bestMove = best;
+            }
+            return minEval;
         }
-        return staticEvaluation(game);
     }
 
     int staticEvaluation(Game game) {
@@ -147,7 +154,7 @@ public class AI {
                     centerCounter++;
                 }
             }
-            return (int) (game.getBoard().getKilledWhite() + centerCounter/7*0.05);
+            return (int) (game.getBoard().getKilledWhite() + centerCounter / 7 * 0.05);
         }
     }
 
@@ -158,7 +165,7 @@ public class AI {
     private static final int INFINITY = Integer.MAX_VALUE;
 
     /** Integer value of the max depth that the minMax algorithm will search. */
-    private static final int MAX_DEPTH = 2;
+    private static final int MAX_DEPTH = 4;
 
     /** Move instance that records the best move found from the minMax algorithm. */
     private static Move _bestMove;

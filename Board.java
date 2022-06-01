@@ -1,6 +1,5 @@
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +23,7 @@ public class Board implements Serializable {
             setupRails();
             setupPieces();
             setupAdjacentCells();
+            setupReachableCells();
         }
     }
 
@@ -78,6 +78,26 @@ public class Board implements Serializable {
                     case 5 -> _adjacentCells[i][j] = i - 1;
                 }
             }
+        }
+    }
+
+    private void setupReachableCells() {
+        _reachableCells = new HashMap<>();
+        for (int i = 0; i < _linearizedArray.length; i++) {
+            HashSet<Integer> tmp = new HashSet<>();
+            for (int j = 0; j < 6; j++) {
+                for (int k = 1; k <= 2; k ++) {
+                    switch (j) {
+                        case 0 -> tmp.add(i + 11 * k);
+                        case 1 -> tmp.add(i + 12 * k);
+                        case 2 -> tmp.add(i + k);
+                        case 3 -> tmp.add(i - 11 * k);
+                        case 4 -> tmp.add(i - 12 * k);
+                        case 5 -> tmp.add(i - k);
+                    }
+                }
+            }
+            _reachableCells.put(i, tmp);
         }
     }
 
@@ -202,6 +222,8 @@ public class Board implements Serializable {
 
     public int[][] getAdjacentCells() { return _adjacentCells; }
 
+    public HashMap<Integer, HashSet<Integer>> getReachableCells() { return _reachableCells; }
+
     /** Linearized array of pieces representing the board. */
     private Pieces[] _linearizedArray;
 
@@ -213,5 +235,8 @@ public class Board implements Serializable {
 
     /** 2D Array containing adjacency information for each piece. */
     private int[][] _adjacentCells;
+
+    /** 2D Array containing reachable marbles to make a string. */
+    private HashMap<Integer, HashSet<Integer>> _reachableCells;
 
 }

@@ -3,12 +3,14 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 public class GUIBoard extends JFrame implements Serializable, MouseListener {
     public GUIBoard(Game game) {
         _game = game;
         _pieces = new TreeMap<>();
+        _marbleString = new LinkedList<String>();
 
         this.setTitle("Abalone Board Game");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -56,9 +58,17 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println("clicked mouse");
         GUIPiece piece = (GUIPiece) e.getSource();
-        piece.setColor(HIGHLIGHT_COLOR);
+        if (_game.getCurrentTurn() == _game.getBoard().getPiece(piece.getPosition())) {
+            if (_marbleString.isEmpty()) {
+                piece.setColor(HIGHLIGHT_COLOR);
+                _marbleString.add(piece.getPosition());
+            } else if (_game.getBoard().getReachableCells().containsKey(_game.getBoard().toIndex(piece.getPosition()))
+                    && _game.getBoard().getReachableCells().get(_game.getBoard().toIndex(piece.getPosition())).contains(_game.getBoard().toIndex(_marbleString.get(0)))) {
+                piece.setColor(HIGHLIGHT_COLOR);
+                _marbleString.add(piece.getPosition());
+            }
+        }
     }
 
     @Override
@@ -81,6 +91,8 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     }
 
+
+
     public void updateBoard() {
         for (char row = 'a'; row <= 'i'; row++) {
             for (int col = 1; col <= 9; col++) {
@@ -96,14 +108,16 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
             }
         }
     }
+
     public void updateGame(Game game) {
         _game = game;
-        System.out.println("success");
     }
 
     private Game _game;
 
     private TreeMap<String, GUIPiece> _pieces;
+
+    private LinkedList<String> _marbleString;
 
     private Color WHITE_COLOR = new Color(230, 230, 240);
     private Color BLACK_COLOR = new Color(39,44,47);
