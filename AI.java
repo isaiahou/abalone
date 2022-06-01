@@ -147,7 +147,7 @@ public class AI {
                     centerCounter++;
                 }
             }
-            return (int) (game.getBoard().getKilledWhite()/6*0.75 + centerCounter/7*0.25);
+            return (int) (game.getBoard().getKilledWhite() + centerCounter/7*0.05);
         }
     }
 

@@ -3,38 +3,62 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
+import java.util.TreeMap;
 
 public class GUIBoard extends JFrame implements Serializable, MouseListener {
     public GUIBoard(Game game) {
         _game = game;
+        _pieces = new TreeMap<>();
 
+        this.setTitle("Abalone Board Game");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(500,500);
         this.setLayout(null);
+        this.getContentPane().setBackground(BACKGROUND_COLOR);
 
-        testPiece = new GUIPiece();
-        label = new JLabel(testPiece);
-        label.addMouseListener(this);
-        label.setBounds(0,0,40,40);
+        setUpPieces();
+        updateBoard();
 
-        this.setLayout(null);
-        this.add(label);
         this.setVisible(true);
+        this.setResizable(false);
+
+        ImageIcon image = new ImageIcon("IconTransparent.png");
+        this.setIconImage(image.getImage());
     }
 
     private void setUpPieces() {
-        for (char row = 'a'; row <= 'i'; row++) {
-            for (int col = 1; col <= 9; col++) {
-
+        int startX = 130;
+        int startY = 25;
+        int marbleIndexStart = 5;
+        int marbleIndexEnd = 9;
+        for (char row = 'i'; row >= 'a'; row--) {
+            int xPos = startX;
+            int yPos = startY;
+            for (int col = marbleIndexStart; col <= marbleIndexEnd; col++) {
+                String position = "" + row + col;
+                GUIPiece piece = new GUIPiece(new GUIPieceIcon(position, EMPTY_COLOR), position);
+                _pieces.put(position, piece);
+                piece.addMouseListener(this);
+                piece.setBounds(xPos, yPos, 40, 40);
+                this.add(piece);
+                xPos += 45.75;
             }
+            if (row > 'e') {
+                startX -= 23;
+                marbleIndexStart--;
+            } else {
+                startX += 23;
+                marbleIndexEnd--;
+            }
+            startY += 46;
         }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         System.out.println("clicked mouse");
-        testPiece.setColor(Color.red);
-        label.repaint();
+        GUIPiece piece = (GUIPiece) e.getSource();
+        piece.setColor(HIGHLIGHT_COLOR);
     }
 
     @Override
@@ -57,7 +81,34 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     }
 
-    JLabel label;
-    GUIPiece testPiece;
+    public void updateBoard() {
+        for (char row = 'a'; row <= 'i'; row++) {
+            for (int col = 1; col <= 9; col++) {
+                String position = "" + row + col;
+                if (_pieces.containsKey(position)) {
+                    Pieces piece = _game.getBoard().getPiece(position);
+                    switch (piece) {
+                        case BLACK -> _pieces.get(position).setColor(BLACK_COLOR);
+                        case WHITE -> _pieces.get(position).setColor(WHITE_COLOR);
+                        case EMPTY -> _pieces.get(position).setColor(EMPTY_COLOR);
+                    }
+                }
+            }
+        }
+    }
+    public void updateGame(Game game) {
+        _game = game;
+        System.out.println("success");
+    }
+
     private Game _game;
+
+    private TreeMap<String, GUIPiece> _pieces;
+
+    private Color WHITE_COLOR = new Color(230, 230, 240);
+    private Color BLACK_COLOR = new Color(39,44,47);
+    private Color EMPTY_COLOR = new Color(210, 180, 140);
+    private Color BACKGROUND_COLOR = new Color(141, 115, 93);
+    private Color HIGHLIGHT_COLOR = new Color(150,150,150);
+
 }

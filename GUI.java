@@ -7,6 +7,15 @@ public class GUI implements Serializable {
         _board = new GUIBoard(game);
     }
 
+    public GUIBoard getBoard() {
+        return _board;
+    }
+
+    public void updateGame(Game game) {
+        _game = game;
+        _board.updateGame(game);
+    }
+
     private GUIBoard _board;
     private Game _game;
 

@@ -11,7 +11,7 @@ public class Main {
         String setting = args[0];
         String aiPlaying = args[1];
         Game newGame = new Game(setting);
-        GUI gui = new GUI(newGame);
+        _gui = new GUI(newGame);
         newGame.showBoard();
         System.out.println();
         if (aiPlaying.equals("false")) {
@@ -59,6 +59,8 @@ public class Main {
             }
         }
         newGame.showBoard();
+        _gui.updateGame(newGame);
+        _gui.getBoard().updateBoard();
         System.out.println("White dead: " + newGame.getBoard().getKilledWhite());
         System.out.println("Black dead: " + newGame.getBoard().getKilledBlack());
         _moveExecuted = false;
@@ -103,6 +105,8 @@ public class Main {
         AI ai = new AI(newGame);
         Move bestMove = ai.findMove();
         newGame.executeMove(bestMove);
+        _gui.updateGame(newGame);
+        _gui.getBoard().updateBoard();
         newGame.showBoard();
         System.out.println("White dead: " + newGame.getBoard().getKilledWhite());
         System.out.println("Black dead: " + newGame.getBoard().getKilledBlack());
@@ -114,5 +118,7 @@ public class Main {
 
     /** String that states the winner's color. */
     private static String _winner;
+
+    private static GUI _gui;
 
 }
