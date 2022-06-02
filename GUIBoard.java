@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -63,12 +64,32 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
             if (_marbleString.isEmpty()) {
                 piece.setColor(HIGHLIGHT_COLOR);
                 _marbleString.add(piece.getPosition());
-            } else if (_game.getBoard().getReachableCells().containsKey(_game.getBoard().toIndex(piece.getPosition()))
-                    && _game.getBoard().getReachableCells().get(_game.getBoard().toIndex(piece.getPosition())).contains(_game.getBoard().toIndex(_marbleString.get(0)))) {
-                piece.setColor(HIGHLIGHT_COLOR);
-                _marbleString.add(piece.getPosition());
+            } else if (_game.getBoard().getReachableCells(_game.getBoard().toIndex(piece.getPosition())) != null
+                    && _game.getBoard().getReachableCells(_game.getBoard().toIndex(piece.getPosition())).contains(_game.getBoard().toIndex(_marbleString.get(0)))) {
+                if (_marbleString.size() == 1) {
+                    piece.setColor(HIGHLIGHT_COLOR);
+                    _marbleString.add(piece.getPosition());
+                    createMarbleString(_game.getBoard().toIndex(_marbleString.getFirst()), _game.getBoard().toIndex(_marbleString.getLast()));
+                    for (String marble: _marbleString) {
+                        GUIPiece stringPiece = _pieces.get(marble);
+                        stringPiece.setColor(HIGHLIGHT_COLOR);
+                    }
+                } else if (_game.getBoard().getReachableCellsDirection().get(_game.getBoard().toIndex(_marbleString.getFirst())).get(_direction).contains(_game.getBoard().toIndex(piece.getPosition()))
+                || _game.getBoard().getReachableCellsDirection().get(_game.getBoard().toIndex(_marbleString.getFirst())).get((_direction + 3) % 6).contains(_game.getBoard().toIndex(piece.getPosition()))) {
+                    piece.setColor(HIGHLIGHT_COLOR);
+                    _marbleString.add(piece.getPosition());
+                    Collections.sort(_marbleString);
+                } else {
+                    clearHighlight();
+                }
+            } else {
+                clearHighlight();
             }
+        } else {
+            clearHighlight();
         }
+
+
     }
 
     @Override
@@ -91,8 +112,6 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     }
 
-
-
     public void updateBoard() {
         for (char row = 'a'; row <= 'i'; row++) {
             for (int col = 1; col <= 9; col++) {
@@ -113,11 +132,49 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         _game = game;
     }
 
+    private void createMarbleString(int linearizedFirst, int linearizedSecond) {
+        _marbleString.clear();
+        for (int i = 0; i < 6; i++) {
+            int pointerMarblePosition = linearizedFirst;
+            for (int j = 0; j < 3; j++) {
+                if (pointerMarblePosition >= 0 && pointerMarblePosition <= 121) {
+                    _marbleString.add(_game.getBoard().indexToString(pointerMarblePosition));
+                    if (linearizedSecond == pointerMarblePosition) {
+                        _direction = i;
+                        return;
+                    } else {
+                        pointerMarblePosition = _game.getBoard().getAdjacentCells()[pointerMarblePosition][i];
+                    }
+                }
+            }
+        _marbleString.clear();
+        }
+    }
+
+    private void clearHighlight() {
+        for (String marble: _marbleString) {
+            GUIPiece stringPiece = _pieces.get(marble);
+            stringPiece.setColor(colorOf(_game.getCurrentTurn()));
+        }
+        _marbleString.clear();
+    }
+
+    private Color colorOf(Pieces color) {
+        return switch (color) {
+            case BLACK -> BLACK_COLOR;
+            case WHITE -> WHITE_COLOR;
+            case EMPTY -> EMPTY_COLOR;
+            case RAIL, FILLER -> null;
+        };
+    }
+
     private Game _game;
 
     private TreeMap<String, GUIPiece> _pieces;
 
     private LinkedList<String> _marbleString;
+
+    private int _direction;
 
     private Color WHITE_COLOR = new Color(230, 230, 240);
     private Color BLACK_COLOR = new Color(39,44,47);

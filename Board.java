@@ -82,22 +82,24 @@ public class Board implements Serializable {
     }
 
     private void setupReachableCells() {
-        _reachableCells = new HashMap<>();
+        _reachableCellsDirection = new HashMap<>();
         for (int i = 0; i < _linearizedArray.length; i++) {
-            HashSet<Integer> tmp = new HashSet<>();
+            HashMap<Integer, LinkedList<Integer>> tmpMap = new HashMap<>();
             for (int j = 0; j < 6; j++) {
+                LinkedList<Integer> tmpLinkedList = new LinkedList<>();
                 for (int k = 1; k <= 2; k ++) {
                     switch (j) {
-                        case 0 -> tmp.add(i + 11 * k);
-                        case 1 -> tmp.add(i + 12 * k);
-                        case 2 -> tmp.add(i + k);
-                        case 3 -> tmp.add(i - 11 * k);
-                        case 4 -> tmp.add(i - 12 * k);
-                        case 5 -> tmp.add(i - k);
+                        case 0 -> tmpLinkedList.add(i + 11 * k);
+                        case 1 -> tmpLinkedList.add(i + 12 * k);
+                        case 2 -> tmpLinkedList.add(i + k);
+                        case 3 -> tmpLinkedList.add(i - 11 * k);
+                        case 4 -> tmpLinkedList.add(i - 12 * k);
+                        case 5 -> tmpLinkedList.add(i - k);
                     }
                 }
+                tmpMap.put(j, tmpLinkedList);
             }
-            _reachableCells.put(i, tmp);
+            _reachableCellsDirection.put(i, tmpMap);
         }
     }
 
@@ -222,7 +224,18 @@ public class Board implements Serializable {
 
     public int[][] getAdjacentCells() { return _adjacentCells; }
 
-    public HashMap<Integer, HashSet<Integer>> getReachableCells() { return _reachableCells; }
+    public HashMap<Integer, HashMap<Integer, LinkedList<Integer>>> getReachableCellsDirection() { return _reachableCellsDirection; }
+
+    public HashSet<Integer> getReachableCells(int cellIndex) {
+        HashSet<Integer> result = new HashSet<>();
+        if (!_reachableCellsDirection.containsKey(cellIndex)) {
+            return null;
+        }
+        for (LinkedList<Integer> direction: _reachableCellsDirection.get(cellIndex).values()) {
+            result.addAll(direction);
+        }
+        return result;
+    }
 
     /** Linearized array of pieces representing the board. */
     private Pieces[] _linearizedArray;
@@ -237,6 +250,8 @@ public class Board implements Serializable {
     private int[][] _adjacentCells;
 
     /** 2D Array containing reachable marbles to make a string. */
+    private HashMap<Integer, HashMap<Integer, LinkedList<Integer>>> _reachableCellsDirection;
+
     private HashMap<Integer, HashSet<Integer>> _reachableCells;
 
 }
