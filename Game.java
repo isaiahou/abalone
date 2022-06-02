@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
@@ -32,8 +33,8 @@ public class Game implements Serializable {
 
     public void executeMove(Move move) throws IOException, ClassNotFoundException {
         _previousBoards.add(DeepClone.cloneBoard(_board));
-        TreeSet<Integer> opponentNewPositions = new TreeSet<>();
-        TreeSet<Integer> newPositions = new TreeSet<>();
+        HashSet<Integer> opponentNewPositions = new HashSet<>();
+        HashSet<Integer> newPositions = new HashSet<>();
         int direction = move.getDirection();
         if (move.getPushOpponent()) {
             for (int pos: move.getOpponentMarbleString()) {

@@ -9,28 +9,57 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         String setting = args[0];
-        String aiPlaying = args[1];
+        String gui = args[1];
+        String aiPlaying = args[2];
         Game newGame = new Game(setting);
-        _gui = new GUI(newGame);
-        newGame.showBoard();
-        System.out.println();
-        if (aiPlaying.equals("false")) {
-            runGame(newGame);
-        } else if (aiPlaying.equals("true")) {
-            String aiPlayers = args[2];
-            if (aiPlayers.equals("2")) {
-                runGameAI2(newGame);
-            } else if (aiPlayers.equals("1")) {
-                runGameAI(newGame);
+        if (gui.equals("false")) {
+            newGame.showBoard();
+            System.out.println();
+            if (aiPlaying.equals("false")) {
+                runGame(newGame);
+            } else if (aiPlaying.equals("true")) {
+                String aiPlayers = args[3];
+                if (aiPlayers.equals("2")) {
+                    runGameAI2(newGame);
+                } else if (aiPlayers.equals("1")) {
+                    runGameAI(newGame);
+                }
+            }
+            System.out.println("The winner is " + _winner + "!");
+        } else {
+            _gui = new GUI(newGame);
+            if (aiPlaying.equals("false")) {
+                runGame(newGame);
+            } else if (aiPlaying.equals("true")) {
+                String aiPlayers = args[3];
+                if (aiPlayers.equals("2")) {
+                    runGameAI2(newGame);
+                } else if (aiPlayers.equals("1")) {
+                    runGameAI(newGame);
+                }
             }
         }
-        System.out.println("The winner is " + _winner + "!");
     }
 
     private static void runGame(Game newGame) throws IOException, ClassNotFoundException {
         while (!newGame.hasWinner()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Black's move:");
+            conductMove(newGame, scanner, "Black's move:");
+            if (!newGame.hasWinner()) {
+                System.out.println("White's move:");
+                conductMove(newGame, scanner, "White's move:");
+            }
+        }
+        if (newGame.getCurrentTurn() == Pieces.WHITE) {
+            _winner = "black";
+        } else {
+            _winner = "white";
+        }
+    }
+
+    private static void runGameGUI(Game newGame) throws IOException, ClassNotFoundException {
+        while (!newGame.hasWinner()) {
             conductMove(newGame, scanner, "Black's move:");
             if (!newGame.hasWinner()) {
                 System.out.println("White's move:");

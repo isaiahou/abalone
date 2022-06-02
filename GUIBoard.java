@@ -4,6 +4,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -12,6 +13,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         _game = game;
         _pieces = new TreeMap<>();
         _marbleString = new LinkedList<String>();
+        _newPositions = new HashSet<Integer>();
 
         this.setTitle("Abalone Board Game");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -60,24 +62,25 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         GUIPiece piece = (GUIPiece) e.getSource();
-        if (_game.getCurrentTurn() == _game.getBoard().getPiece(piece.getPosition())) {
+        String piecePosition = piece.getPosition();
+        if (_game.getCurrentTurn() == _game.getBoard().getPiece(piecePosition)) {
             if (_marbleString.isEmpty()) {
                 piece.setColor(HIGHLIGHT_COLOR);
-                _marbleString.add(piece.getPosition());
-            } else if (_game.getBoard().getReachableCells(_game.getBoard().toIndex(piece.getPosition())) != null
-                    && _game.getBoard().getReachableCells(_game.getBoard().toIndex(piece.getPosition())).contains(_game.getBoard().toIndex(_marbleString.get(0)))) {
+                _marbleString.add(piecePosition);
+            } else if (hasReachableCells(piecePosition) && marbleStringCanReachCell(piecePosition)) {
                 if (_marbleString.size() == 1) {
                     piece.setColor(HIGHLIGHT_COLOR);
-                    _marbleString.add(piece.getPosition());
-                    createMarbleString(_game.getBoard().toIndex(_marbleString.getFirst()), _game.getBoard().toIndex(_marbleString.getLast()));
+                    _marbleString.add(piecePosition);
+                    int firstMarbleIndex = _game.getBoard().toIndex(_marbleString.getFirst());
+                    int lastMarbleIndex = _game.getBoard().toIndex(_marbleString.getLast());
+                    createMarbleString(firstMarbleIndex, lastMarbleIndex);
                     for (String marble: _marbleString) {
                         GUIPiece stringPiece = _pieces.get(marble);
                         stringPiece.setColor(HIGHLIGHT_COLOR);
                     }
-                } else if (_game.getBoard().getReachableCellsDirection().get(_game.getBoard().toIndex(_marbleString.getFirst())).get(_direction).contains(_game.getBoard().toIndex(piece.getPosition()))
-                || _game.getBoard().getReachableCellsDirection().get(_game.getBoard().toIndex(_marbleString.getFirst())).get((_direction + 3) % 6).contains(_game.getBoard().toIndex(piece.getPosition()))) {
+                } else if (inMarbleStringDirection(piecePosition) || inReverseMarbleStringDirection(piecePosition)) {
                     piece.setColor(HIGHLIGHT_COLOR);
-                    _marbleString.add(piece.getPosition());
+                    _marbleString.add(piecePosition);
                     Collections.sort(_marbleString);
                 } else {
                     clearHighlight();
@@ -88,8 +91,6 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         } else {
             clearHighlight();
         }
-
-
     }
 
     @Override
@@ -104,12 +105,41 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
+        GUIPiece piece = (GUIPiece) e.getSource();
+        String piecePosition = piece.getPosition();
+        int pieceIndex = _game.getBoard().toIndex(piecePosition);
+        if (!_marbleString.isEmpty() && adjacentCells(_game.getBoard().toIndex(_marbleString.getFirst())).contains(pieceIndex)) {
+            if (_game.getCurrentTurn() != _game.getBoard().getPiece(piecePosition)) {
+                if (_marbleString.size() == 1) {
+                    _moveString = _marbleString.getFirst() + "," + piecePosition;
+                } else {
+                    _moveString = _marbleString.getFirst() + "-" + _marbleString.getLast() + "," + piecePosition;
+                }
+                Move move = new Move(_moveString, _game.getCurrentTurn(), _game.getBoard(), true);
+                if (move.isValidMove()) {
+                    markNewPositions(move);
+                }
+            }
+        } else if (!_marbleString.isEmpty() && adjacentCells(_game.getBoard().toIndex(_marbleString.getLast())).contains(pieceIndex)) {
+            if (_game.getCurrentTurn() != _game.getBoard().getPiece(piecePosition)) {
+                if (_marbleString.size() == 1) {
+                    _moveString = _marbleString.getLast() + "," + piecePosition;
+                } else {
+                    _moveString = _marbleString.getFirst() + "-" + _marbleString.getLast() + "," + piecePosition;
+                }
+                Move move = new Move(_moveString, _game.getCurrentTurn(), _game.getBoard(), true);
+                if (move.isValidMove()) {
+                    markNewPositions(move);
+                }
+            }
+        }
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        if (!_newPositions.isEmpty()) {
+            removeNewPositions();
+        }
     }
 
     public void updateBoard() {
@@ -131,6 +161,66 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     public void updateGame(Game game) {
         _game = game;
     }
+
+
+    private void markNewPositions(Move move) {
+        int direction = move.getDirection();
+        for (int pos: move.getMarbleString()) {
+            int newPos = _game.getBoard().getAdjacentCells()[pos][direction];
+            _newPositions.add(newPos);
+        }
+        for (Integer newPos: _newPositions) {
+            String newPosString = _game.getBoard().indexToString(newPos);
+            GUIPiece piece = _pieces.get(newPosString);
+            piece.setColor(MOVE_COLOR);
+        }
+    }
+
+    private void removeNewPositions() {
+        for (Integer newPos: _newPositions) {
+            String newPosString = _game.getBoard().indexToString(newPos);
+            GUIPiece piece = _pieces.get(newPosString);
+            Color color = colorOf(_game.getBoard().getPiece(newPosString));
+            piece.setColor(color);
+        }
+        for (String highlightedPos: _marbleString) {
+            GUIPiece piece = _pieces.get(highlightedPos);
+            piece.setColor(HIGHLIGHT_COLOR);
+        }
+        _newPositions.clear();
+    }
+
+    private HashSet<Integer> adjacentCells(int marbleIndex) {
+        HashSet<Integer> result = new HashSet<>();
+        for (int i = 0; i < 6; i++) {
+            result.add(_game.getBoard().getAdjacentCells()[marbleIndex][i]);
+        }
+        return result;
+    }
+
+    private boolean hasReachableCells(String piecePosition) {
+        int indexPosition = _game.getBoard().toIndex(piecePosition);
+        return _game.getBoard().getReachableCells(indexPosition) != null;
+    }
+
+    private boolean marbleStringCanReachCell(String piecePosition) {
+        int indexPosition = _game.getBoard().toIndex(piecePosition);
+        int firstMarblePosition = _game.getBoard().toIndex(_marbleString.getFirst());
+        return _game.getBoard().getReachableCells(indexPosition).contains(firstMarblePosition);
+    }
+
+    private boolean inMarbleStringDirection(String piecePosition) {
+        int indexPosition = _game.getBoard().toIndex(piecePosition);
+        int firstMarblePosition = _game.getBoard().toIndex(_marbleString.getFirst());
+        return _game.getBoard().getReachableCellsDirection().get(firstMarblePosition).get(_direction).contains(indexPosition);
+    }
+
+    private boolean inReverseMarbleStringDirection(String piecePosition) {
+        int indexPosition = _game.getBoard().toIndex(piecePosition);
+        int firstMarblePosition = _game.getBoard().toIndex(_marbleString.getFirst());
+        return _game.getBoard().getReachableCellsDirection().get(firstMarblePosition).get((_direction + 3) % 6).contains(indexPosition);
+    }
+
 
     private void createMarbleString(int linearizedFirst, int linearizedSecond) {
         _marbleString.clear();
@@ -176,10 +266,16 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     private int _direction;
 
+    private String _moveString;
+
+    private HashSet<Integer> _newPositions;
+
     private Color WHITE_COLOR = new Color(230, 230, 240);
     private Color BLACK_COLOR = new Color(39,44,47);
     private Color EMPTY_COLOR = new Color(210, 180, 140);
     private Color BACKGROUND_COLOR = new Color(141, 115, 93);
     private Color HIGHLIGHT_COLOR = new Color(150,150,150);
+
+    private Color MOVE_COLOR = new Color (255, 160, 160);
 
 }
