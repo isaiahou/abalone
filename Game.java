@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Stack;
-import java.util.TreeSet;
 
 /** Class that represents an instance of a game.
  *  @author Isaiah Ou

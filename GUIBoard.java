@@ -295,7 +295,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = linearizedFirst;
             for (int j = 0; j < 3; j++) {
-                if (pointerMarblePosition >= 0 && pointerMarblePosition <= 121) {
+                if (pointerMarblePosition >= 0 && pointerMarblePosition < 121) {
                     _marbleString.add(_game.getBoard().indexToString(pointerMarblePosition));
                     if (linearizedSecond == pointerMarblePosition) {
                         _direction = i;

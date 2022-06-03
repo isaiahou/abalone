@@ -68,7 +68,7 @@ public class Move {
         for (int i = 0; i < 6; i++) {
             int pointerMarblePosition = _linearizedFirst;
             for (int j = 0; j < 26; j++) {
-                if (pointerMarblePosition >= 0 && pointerMarblePosition <= 121) {
+                if (pointerMarblePosition >= 0 && pointerMarblePosition < 121) {
                     if (_board.getPiece(pointerMarblePosition) == _currentColor) {
                         _marbleString.add(pointerMarblePosition);
                         if (_linearizedSecond == pointerMarblePosition) {
