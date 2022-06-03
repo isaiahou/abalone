@@ -73,6 +73,11 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         _blackCounter.setFont(new Font("Verdana", Font.BOLD, 14));
         _blackCounter.setBounds(5,-50,150,150);
         this.add(_blackCounter);
+        _whoseTurn = new JLabel();
+        _whoseTurn.setText("Turn: " + _game.getCurrentTurnString());
+        _whoseTurn.setFont(new Font("Verdana", Font.BOLD, 14));
+        _whoseTurn.setBounds(5, -35, 150, 150);
+        this.add(_whoseTurn);
     }
 
     @Override
@@ -189,6 +194,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     public void updateBoard() {
         _whiteCounter.setText("White Dead: " + _game.getBoard().getKilledWhite());
         _blackCounter.setText("Black Dead: " + _game.getBoard().getKilledBlack());
+        _whoseTurn.setText("Turn: " + _game.getCurrentTurnString());
         for (char row = 'a'; row <= 'i'; row++) {
             for (int col = 1; col <= 9; col++) {
                 String position = "" + row + col;
@@ -329,6 +335,8 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     private JLabel _whiteCounter;
 
     private JLabel _blackCounter;
+
+    private JLabel _whoseTurn;
 
     private LinkedList<String> _marbleString;
 

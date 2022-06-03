@@ -104,6 +104,14 @@ public class Game implements Serializable {
 
     public Pieces getCurrentTurn() { return _currentTurn; }
 
+    public String getCurrentTurnString() {
+        if (_currentTurn == Pieces.BLACK) {
+            return "Black";
+        } else {
+            return "White";
+        }
+    }
+
     /** Holds the board instance of the game. */
     private Board _board;
 
