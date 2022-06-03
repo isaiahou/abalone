@@ -31,6 +31,15 @@ public class Game implements Serializable {
         }
     }
 
+    public String getWinnerString() {
+        Pieces winner = getWinner();
+        if (winner == Pieces.BLACK) {
+            return "Black";
+        } else {
+            return "White";
+        }
+    }
+
     public void executeMove(Move move) throws IOException, ClassNotFoundException {
         _previousBoards.add(DeepClone.cloneBoard(_board));
         HashSet<Integer> opponentNewPositions = new HashSet<>();

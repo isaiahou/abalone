@@ -3,8 +3,9 @@ import java.awt.*;
 import java.io.Serializable;
 
 public class GUI implements Serializable {
-    GUI(Game game) {
-        _board = new GUIBoard(game);
+    GUI(Game game, int numPlayers) {
+        _board = new GUIBoard(game, numPlayers);
+        _numPlayers = numPlayers;
     }
 
     public GUIBoard getBoard() {
@@ -18,6 +19,8 @@ public class GUI implements Serializable {
 
     private GUIBoard _board;
     private Game _game;
+
+    private int _numPlayers;
 
 }
 

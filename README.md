@@ -3,10 +3,14 @@ Coding project based on the board game abalone.
 - The basic rules of the game can be found here: https://cdn.1j1ju.com/medias/c2/b0/3a-abalone-rulebook.pdf
 
 ## Usage
-java abalone.main [setting] [AI player] [Number of AI players]*
+java abalone.main [setting] [GUI] [AI player] [Number of AI players]*
 
-Settings:
+Setting:
 - "default" - begins a game with the standard, default layout of 2-player abalone
+
+GUI:
+- "true" - enables GUI
+- "false" - plays and displays game through terminal
 
 AI Player:
 - "true" - allows one or two players to be an AI

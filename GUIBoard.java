@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,11 +10,12 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 
 public class GUIBoard extends JFrame implements Serializable, MouseListener {
-    public GUIBoard(Game game) {
+    public GUIBoard(Game game, int numPlayers) {
         _game = game;
         _pieces = new TreeMap<>();
-        _marbleString = new LinkedList<String>();
-        _newPositions = new HashSet<Integer>();
+        _numPlayers = numPlayers;
+        _marbleString = new LinkedList<>();
+        _newPositions = new HashSet<>();
 
         this.setTitle("Abalone Board Game");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,6 +24,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         this.getContentPane().setBackground(BACKGROUND_COLOR);
 
         setUpPieces();
+        setUpCounter();
         updateBoard();
 
         this.setVisible(true);
@@ -32,7 +35,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     }
 
     private void setUpPieces() {
-        int startX = 130;
+        int startX = 133;
         int startY = 25;
         int marbleIndexStart = 5;
         int marbleIndexEnd = 9;
@@ -59,8 +62,27 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
         }
     }
 
+    private void setUpCounter() {
+        _whiteCounter = new JLabel();
+        _whiteCounter.setText("White Dead: " + _game.getBoard().getKilledWhite());
+        _whiteCounter.setFont(new Font("Verdana", Font.BOLD, 14));
+        _whiteCounter.setBounds(5,-65,150,150);
+        this.add(_whiteCounter);
+        _blackCounter = new JLabel();
+        _blackCounter.setText("Black Dead: " + _game.getBoard().getKilledBlack());
+        _blackCounter.setFont(new Font("Verdana", Font.BOLD, 14));
+        _blackCounter.setBounds(5,-50,150,150);
+        this.add(_blackCounter);
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (_numPlayers == 0) {
+            return;
+        }
+        if (_numPlayers == 1 && _game.getCurrentTurn() != Pieces.BLACK) {
+            return;
+        }
         GUIPiece piece = (GUIPiece) e.getSource();
         String piecePosition = piece.getPosition();
         if (_game.getCurrentTurn() == _game.getBoard().getPiece(piecePosition)) {
@@ -74,7 +96,7 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
                     int firstMarbleIndex = _game.getBoard().toIndex(_marbleString.getFirst());
                     int lastMarbleIndex = _game.getBoard().toIndex(_marbleString.getLast());
                     createMarbleString(firstMarbleIndex, lastMarbleIndex);
-                    for (String marble: _marbleString) {
+                    for (String marble : _marbleString) {
                         GUIPiece stringPiece = _pieces.get(marble);
                         stringPiece.setColor(HIGHLIGHT_COLOR);
                     }
@@ -87,6 +109,16 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
                 }
             } else {
                 clearHighlight();
+            }
+        } else if (piece == _potentialMovePiece) {
+            try {
+                _game.executeMove(_potentialMove);
+                _potentialMove = null;
+                _potentialMovePiece = null;
+                _marbleString.clear();
+                updateBoard();
+            } catch (IOException | ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
             }
         } else {
             clearHighlight();
@@ -105,6 +137,12 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     @Override
     public void mouseEntered(MouseEvent e) {
+        if (_numPlayers == 0) {
+            return;
+        }
+        if (_numPlayers == 1 && _game.getCurrentTurn() != Pieces.BLACK) {
+            return;
+        }
         GUIPiece piece = (GUIPiece) e.getSource();
         String piecePosition = piece.getPosition();
         int pieceIndex = _game.getBoard().toIndex(piecePosition);
@@ -118,6 +156,8 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
                 Move move = new Move(_moveString, _game.getCurrentTurn(), _game.getBoard(), true);
                 if (move.isValidMove()) {
                     markNewPositions(move);
+                    _potentialMove = move;
+                    _potentialMovePiece = piece;
                 }
             }
         } else if (!_marbleString.isEmpty() && adjacentCells(_game.getBoard().toIndex(_marbleString.getLast())).contains(pieceIndex)) {
@@ -130,6 +170,8 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
                 Move move = new Move(_moveString, _game.getCurrentTurn(), _game.getBoard(), true);
                 if (move.isValidMove()) {
                     markNewPositions(move);
+                    _potentialMove = move;
+                    _potentialMovePiece = piece;
                 }
             }
         }
@@ -139,10 +181,14 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     public void mouseExited(MouseEvent e) {
         if (!_newPositions.isEmpty()) {
             removeNewPositions();
+            _potentialMove = null;
+            _potentialMovePiece = null;
         }
     }
 
     public void updateBoard() {
+        _whiteCounter.setText("White Dead: " + _game.getBoard().getKilledWhite());
+        _blackCounter.setText("Black Dead: " + _game.getBoard().getKilledBlack());
         for (char row = 'a'; row <= 'i'; row++) {
             for (int col = 1; col <= 9; col++) {
                 String position = "" + row + col;
@@ -155,6 +201,10 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
                     }
                 }
             }
+        }
+        if (_game.hasWinner()) {
+            String message = "The winner is: " + _game.getWinnerString();
+            JOptionPane.showMessageDialog(this, message);
         }
     }
 
@@ -206,7 +256,19 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
     private boolean marbleStringCanReachCell(String piecePosition) {
         int indexPosition = _game.getBoard().toIndex(piecePosition);
         int firstMarblePosition = _game.getBoard().toIndex(_marbleString.getFirst());
-        return _game.getBoard().getReachableCells(indexPosition).contains(firstMarblePosition);
+        boolean firstCheck = _game.getBoard().getReachableCells(indexPosition).contains(firstMarblePosition);
+        if (!firstCheck) {
+            return false;
+        } else {
+            int direction = 7;
+            for (int i = 0; i < 6; i++) {
+                if (_game.getBoard().getReachableCellsDirection().get(firstMarblePosition).get(i).contains(indexPosition)) {
+                    direction = i;
+                }
+            }
+            int pointerMarble = _game.getBoard().getAdjacentCells()[firstMarblePosition][direction];
+            return _game.getCurrentTurn() == _game.getBoard().getPiece(pointerMarble);
+        }
     }
 
     private boolean inMarbleStringDirection(String piecePosition) {
@@ -262,6 +324,12 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     private TreeMap<String, GUIPiece> _pieces;
 
+    private int _numPlayers;
+
+    private JLabel _whiteCounter;
+
+    private JLabel _blackCounter;
+
     private LinkedList<String> _marbleString;
 
     private int _direction;
@@ -270,12 +338,15 @@ public class GUIBoard extends JFrame implements Serializable, MouseListener {
 
     private HashSet<Integer> _newPositions;
 
+    private Move _potentialMove;
+
+    private GUIPiece _potentialMovePiece;
+
     private Color WHITE_COLOR = new Color(230, 230, 240);
     private Color BLACK_COLOR = new Color(39,44,47);
     private Color EMPTY_COLOR = new Color(210, 180, 140);
     private Color BACKGROUND_COLOR = new Color(141, 115, 93);
     private Color HIGHLIGHT_COLOR = new Color(150,150,150);
-
     private Color MOVE_COLOR = new Color (255, 160, 160);
 
 }

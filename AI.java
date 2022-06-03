@@ -165,7 +165,7 @@ public class AI {
     private static final int INFINITY = Integer.MAX_VALUE;
 
     /** Integer value of the max depth that the minMax algorithm will search. */
-    private static final int MAX_DEPTH = 4;
+    private static final int MAX_DEPTH = 2;
 
     /** Move instance that records the best move found from the minMax algorithm. */
     private static Move _bestMove;
