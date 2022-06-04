@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
  */
 
 public class Move {
+
     Move(String positionSpecification, Pieces whoseTurn, Board board, boolean AI) {
         Pattern singleMove = Pattern.compile("[a-i][1-9],[a-i][1-9]");
         Pattern multiMove = Pattern.compile("[a-i][1-9]-[a-i][1-9],[a-i][1-9]");
@@ -20,22 +21,23 @@ public class Move {
         _board = board;
         _marbleString = new LinkedList<>();
         _opponentMarbleString = new LinkedList<>();
-        _firstMarble = positionSpecification.substring(0, 2);
+        String firstMarble = positionSpecification.substring(0, 2);
         _currentTurn = whoseTurn;
-        _currentColor = _board.getPiece(_firstMarble);
+        _currentColor = _board.getPiece(firstMarble);
         _opponentColor = oppositeColor(_currentColor);
-        _linearizedFirst = _board.toIndex(_firstMarble);
+        _linearizedFirst = _board.toIndex(firstMarble);
+        String destinationMarble;
         if (positionSpecification.charAt(2) == '-') {
-            _secondMarble = positionSpecification.substring(3, 5);
-            _linearizedSecond = _board.toIndex(_secondMarble);
+            String secondMarble = positionSpecification.substring(3, 5);
+            _linearizedSecond = _board.toIndex(secondMarble);
             createMarbleString();
-            _destinationMarble = positionSpecification.substring(6);
+            destinationMarble = positionSpecification.substring(6);
         } else {
-            _marbleString.add(_board.toIndex(_firstMarble));
+            _marbleString.add(_board.toIndex(firstMarble));
             _marbleInLine = true;
-            _destinationMarble = positionSpecification.substring(3, 5);
+            destinationMarble = positionSpecification.substring(3, 5);
         }
-        _linearizedDestination = _board.toIndex(_destinationMarble);
+        _linearizedDestination = _board.toIndex(destinationMarble);
         if (AI) {
             setValidMoveAI();
         } else {
@@ -117,14 +119,12 @@ public class Move {
         }
         for (int i = 0; i < 6; i++) {
             if (_board.getAdjacentCells()[_linearizedFirst][i] == _linearizedDestination) {
-                _commandFormat = "first";
                 _direction = i;
                 return true;
             }
         }
         for (int i = 0; i < 6; i++) {
             if (_board.getAdjacentCells()[_linearizedSecond][i] == _linearizedDestination) {
-                _commandFormat = "second";
                 _direction = i;
                 return true;
             }
@@ -199,14 +199,12 @@ public class Move {
         }
         for (int i = 0; i < 6; i++) {
             if (_board.getAdjacentCells()[_linearizedSecond][i] == _linearizedDestination) {
-                _commandFormat = "second";
                 _direction = i;
                 return true;
             }
         }
         for (int i = 0; i < 6; i++) {
             if (_board.getAdjacentCells()[_linearizedFirst][i] == _linearizedDestination) {
-                _commandFormat = "first";
                 _direction = i;
                 return true;
             }
@@ -286,15 +284,6 @@ public class Move {
                 && this.getMarbleString().containsAll(m.getMarbleString());
     }
 
-    /** String representing the coordinates of the first marble. */
-    private String _firstMarble;
-
-    /** String representing the coordinates of the second marble. */
-    private String _secondMarble;
-
-    /** String representing the coordinates of the destination marble. */
-    private String _destinationMarble;
-
     /** Integer representing the index of the first marble. */
     private int _linearizedFirst;
 
@@ -319,9 +308,6 @@ public class Move {
 
     /** Direction of marble alignment indexed with the top left corner as 0. */
     private int _marbleDirection;
-
-    /** String indicating whether the format of the command. */
-    private String _commandFormat;
 
     /** Indication of the move's color. */
     private Pieces _currentColor;

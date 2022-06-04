@@ -99,8 +99,6 @@ public class Game implements Serializable {
 
     public Board getBoard() { return _board; }
 
-    public Stack<Board> getPreviousBoards() { return _previousBoards; }
-
     public Pieces getCurrentTurn() { return _currentTurn; }
 
     public String getCurrentTurnString() {

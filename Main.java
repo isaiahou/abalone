@@ -7,6 +7,7 @@ import java.util.Scanner;
  */
 
 public class Main {
+
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         String setting = args[0];
         String gui = args[1];
@@ -130,7 +131,6 @@ public class Main {
         }
     }
 
-
     private static void conductMoveAI(Game newGame, boolean GUI) throws IOException, ClassNotFoundException {
         AI ai = new AI(newGame);
         Move bestMove = ai.findMove();
@@ -146,13 +146,13 @@ public class Main {
         _moveExecuted = false;
     }
 
-
     /** Boolean value to record whether a move has been executed. */
     private static boolean _moveExecuted = false;
 
     /** String that states the winner's color. */
     private static String _winner;
 
+    /** Swing GUI for the game if GUI is true */
     private static GUI _gui;
 
 }

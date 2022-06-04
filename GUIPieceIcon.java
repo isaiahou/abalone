@@ -2,12 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.Serializable;
 
+/** The Icon object that contains the visual coloring of each position on the board.
+ *  @author Isaiah Ou
+ */
+
 public class GUIPieceIcon implements Serializable, Icon {
 
-    public GUIPieceIcon(String position, Color color) {
-        _color = color;
-        _position = position;
-    }
+    public GUIPieceIcon(Color color) { _color = color; }
 
     public void setColor(Color color) {
         this._color = color;
@@ -31,8 +32,7 @@ public class GUIPieceIcon implements Serializable, Icon {
         return 40;
     }
 
+    /** The current color of the position on the board. */
     private Color _color;
-
-    private String _position;
 
 }

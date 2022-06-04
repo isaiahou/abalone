@@ -1,11 +1,14 @@
-import javax.swing.*;
-import java.awt.*;
 import java.io.Serializable;
 
+/** The GUI object that contains the GUIBoard.
+ *  Allows for external access from outside the GUIBoard.
+ *  @author Isaiah Ou
+ */
+
 public class GUI implements Serializable {
+
     GUI(Game game, int numPlayers) {
         _board = new GUIBoard(game, numPlayers);
-        _numPlayers = numPlayers;
     }
 
     public GUIBoard getBoard() {
@@ -13,14 +16,11 @@ public class GUI implements Serializable {
     }
 
     public void updateGame(Game game) {
-        _game = game;
         _board.updateGame(game);
     }
 
-    private GUIBoard _board;
-    private Game _game;
-
-    private int _numPlayers;
+    /** The GUI's GUIBoard instance. */
+    private final GUIBoard _board;
 
 }
 

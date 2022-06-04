@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  */
 
 public class AI {
+
     AI (Game game) {
         _game = game;
     }
@@ -43,7 +44,8 @@ public class AI {
                     String destinationPos = "" + destinationRow + destinationCol;
                     Matcher positionMatcher = positionString.matcher(destinationPos);
                     if (positionMatcher.matches()
-                        && copyNewGame.getBoard().getPiece(copyNewGame.getBoard().toIndex(destinationPos)) == copyNewGame.getCurrentTurn()
+                        && copyNewGame.getBoard().getPiece(copyNewGame.getBoard().toIndex(destinationPos))
+                            == copyNewGame.getCurrentTurn()
                         && !myPiecePos.equals(destinationPos)
                         && !marbleStrings.contains(myPiecePos + "-" + destinationPos)
                         && !marbleStrings.contains(destinationPos + "-" + myPiecePos)) {
@@ -69,7 +71,9 @@ public class AI {
                     String destinationPos = "" + destinationRow + destinationCol;
                     Matcher positionMatcher = positionString.matcher(destinationPos);
                     if (positionMatcher.matches() && !marbleString.equals(destinationPos)) {
-                        Move move = new Move(marbleString + "," + destinationPos, copyNewGame.getCurrentTurn(), copyNewGame.getBoard(), true);
+                        String positionSpecification = marbleString + "," + destinationPos;
+                        Move move = new Move(positionSpecification, copyNewGame.getCurrentTurn(),
+                                copyNewGame.getBoard(), true);
                         if (move.isValidMove()) {
                             legalMoves.add(move);
                         }
@@ -91,7 +95,20 @@ public class AI {
         return _bestMove;
     }
 
-    private int minMax(Game game, int depth, int alpha, int beta, boolean maximizingPlayer, boolean saveMove) throws IOException, ClassNotFoundException {
+    /** Min-Max algorithm that searches for the best move according to a basic heuristic.
+     * Uses alpha beta pruning to reduce run-time.
+     * @param game takes in a copied instance of the game that can be used to test possible moves.
+     * @param depth measures the number of moves that the AI will look ahead.
+     * @param alpha value for alpha, initially infinity.
+     * @param beta value for beta, initially negative infinity.
+     * @param maximizingPlayer boolean value to determine whether the algorithm is dealing with a max or min player
+     * @param saveMove indicates whether the found move should be saved and used later to be executed, initially true
+     * @return returns the integer static evaluation of the heuristic of the best move.
+     * @throws IOException exception as a result of use of serialization to produce deep copies.
+     * @throws ClassNotFoundException exception as a result of use of serialization to produce deep copies.
+     */
+    private int minMax(Game game, int depth, int alpha, int beta, boolean maximizingPlayer, boolean saveMove)
+            throws IOException, ClassNotFoundException {
         if (depth == 0 || game.hasWinner()) {
             return staticEvaluation(game);
         }
