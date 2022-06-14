@@ -11,6 +11,7 @@ Setting:
 GUI:
 - "true" - enables GUI
 - "false" - plays and displays game through terminal
+- ![Abalone GUI](GUIShowcase.png)
 
 AI Player:
 - "true" - allows one or two players to be an AI
